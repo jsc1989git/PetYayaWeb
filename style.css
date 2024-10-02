@@ -204,6 +204,7 @@ svg {
     text-align: justify;
     margin-left: 10%;
     margin-right: 10%;
+    text-size-adjust: var(--fs-300);
   }
   .even-columns {
     display: flex;
@@ -218,18 +219,18 @@ svg {
     border-style: double;
     border-color: #ff7888;
     text-align: justify;
+    justify-content: center;
     padding: 5%;
-    width: 400px;
+    width: 350px;
     height: 400px;
     text-indent: 20px;
   }
 
   .card img {
-    width: 200px;
-    height: 200px;
+    width: 150px;
+    height: 150px;
     border-radius: 20%;
     padding: 1px;
-    margin: 10px 23%;
   }
 }
 
