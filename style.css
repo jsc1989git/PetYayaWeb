@@ -169,8 +169,11 @@ svg {
 }
 
 .card {
+  display: flex;
+  flex-direction: column;
   align-items: center;
   align-content: center;
+  gap: 20px;
   border-style: double;
   border-color: #ff7888;
   text-align: justify;
@@ -185,7 +188,7 @@ svg {
   height: 200px;
   border-radius: 20%;
   padding: 1px;
-  margin: 10px 30%;
+  align-self: center;
 }
 
 .content-paragraph {
@@ -208,6 +211,25 @@ svg {
     text-align: justify;
     padding: 50px;
     flex-direction: column;
+  }
+  .card {
+    align-items: center;
+    align-content: center;
+    border-style: double;
+    border-color: #ff7888;
+    text-align: justify;
+    padding: 5%;
+    width: 400px;
+    height: 400px;
+    text-indent: 20px;
+  }
+
+  .card img {
+    width: 200px;
+    height: 200px;
+    border-radius: 20%;
+    padding: 1px;
+    margin: 10px 23%;
   }
 }
 
