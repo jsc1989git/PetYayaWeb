@@ -875,9 +875,10 @@ a.icon-link {
   align-items: center;
   align-content: center;
   justify-content: center;
-  color: #fff;
+  color: var(--clr-accent);
   gap: 20px;
-  background-color: #ff7888;
+  border-style: groove;
+  border-color: #ff7888;
   border-radius: 25%;
   text-align: justify;
   padding: 5%;
