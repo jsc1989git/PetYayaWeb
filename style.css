@@ -863,3 +863,71 @@ a.icon-link {
     margin-bottom: 100px;
   }
 }
+
+/*Sign Up*/
+.Signup-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  margin-top: 5%;
+  margin-bottom: 5%;
+}
+
+.Signup-container {
+  display: flex;
+  gap: 100px;
+  margin-top: 1%;
+}
+
+.Signup-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  align-content: center;
+  justify-content: center;
+  color: #fff;
+  gap: 20px;
+  background-color: #ff7888;
+  border-radius: 25%;
+  text-align: justify;
+  padding: 5%;
+  width: 400px;
+  height: 400px;
+  text-indent: 20px;
+}
+
+.Signup-card img {
+  width: 200px;
+  height: 200px;
+  border-radius: 20%;
+  padding: 1px;
+  align-self: center;
+}
+
+@media (max-width: 768px) {
+  .Signup-container {
+    flex-direction: column;
+    margin-top: 30px;
+    gap: 30px;
+    min-height: 500px;
+    min-width: 300px;
+  }
+
+  .Signup-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    align-content: center;
+    justify-content: center;
+    color: #fff;
+    gap: 20px;
+    background-color: #ff7888;
+    border-radius: 25%;
+    text-align: justify;
+    padding: 5%;
+    width: 350px;
+    height: 350px;
+    text-indent: 20px;
+  }
+}
