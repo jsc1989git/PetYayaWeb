@@ -1077,6 +1077,7 @@ a.icon-link {
     box-sizing: border-box;
     height: 500px;
     padding: 20px;
-    width: 400px;
+    width: 300px;
+    margin:5px;
   }
 }
