@@ -1075,9 +1075,23 @@ a.icon-link {
     background-color: #15172b;
     border-radius: 20px;
     box-sizing: border-box;
-    height: 500px;
+    height: 520px;
     padding: 20px;
     width: 300px;
-    margin:5px;
+  }
+
+  .submit {
+    background-color: #ff7888;
+    border-radius: 12px;
+    border: 0;
+    box-sizing: border-box;
+    color: #eee;
+    cursor: pointer;
+    font-size: 18px;
+    height: 40px;
+    margin-top: 90px;
+    outline: 0;
+    text-align: center;
+    width: 100%;
   }
 }
