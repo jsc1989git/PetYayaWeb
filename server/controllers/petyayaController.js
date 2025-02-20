@@ -32,3 +32,13 @@ exports.addPost = async(req, res) => {
     res.redirect('/dashboard')
 }
 
+exports.editPostForm = async(req, res) => {
+    const post = await Posts.findById(req.params.id);
+    res.render = ('/dashboard')
+}
+
+exports.deletePost = async (req, res) => {
+    const post = await Posts.findByIdAndDelete(req.params.id);
+    res.redirect('/dashboard');
+}
+

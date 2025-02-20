@@ -23,5 +23,5 @@ app.use(express.static("public")); // Serve static files (CSS, JS, images)
 app.use('/', petyayaRoute)
 
 app.listen(PORT, () => {
-    console.log("Server running on port 3000");
+    console.log(`Server running on port ${PORT}`);
 })
