@@ -4,8 +4,9 @@ const petyayaController = require('../controllers/petyayaController')
 
 router.get('/', petyayaController.index)
 router.get('/dashboard', petyayaController.posts)
-router.get('/edit-post/:id', petyayaController.editPostForm)
 router.post('/add-post', petyayaController.addPost)
+router.get('/edit-post/:id', petyayaController.editPostForm)
+router.put('/edit-post/:id', petyayaController.editPost)
 router.delete('/delete-post/:id', petyayaController.deletePost);
 
 module.exports = router;
