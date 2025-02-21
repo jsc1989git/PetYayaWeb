@@ -5,9 +5,11 @@
 :root {
   --c-dark: #212529;
   --c-brand: hsl(353, 100%, 74%);
-  --c-brand-light: hsl(0, 0%, 100%);
+  --c-brand-dark: hsl(353, 100%, 69%);
+  --c-brand-light: hsl(353, 100%, 77%);
   --c-brand-rgb: 78, 87, 212;
   --c-body: hsl(0, 0%, 17%);
+  --c-body-light: hsl(0, 0%, 100%);
   --font-base: "Quicksand", system-ui;
   --box-shadow: 0px 15px 25px rgba(0, 0, 0, 0.08);
   --transition: all 0.5s ease;
@@ -106,7 +108,7 @@ img {
 }
 
 .navbar-nav .nav-link.active {
-  color: var(--c-brand-light);
+  color: var(--c-body-light);
 }
 
 @media (max-width: 992px) {
@@ -130,22 +132,36 @@ img {
 
 /* BTN */
 .btn {
-  font-weight: 700;
-  font-size: 20px;
-  border-radius: 20px;
-  padding: 10px 24px;
+  border-radius: 32px;
 }
 
 .btn-brand {
-  background-color: var(--c-brand-light);
+  background-color: var(--c-brand);
   border-color: var(--c-brand);
-  color: var(--c-body);
+  color: var(--c-body-light);
 }
 
 .btn-brand:hover {
-  background-color: var(--c-brand);
-  border-color: var(--c-brand-light);
-  color: var(--c-body);
+  background-color: var(--c-brand-dark);
+  border-color: var(--c-brand-dark);
+  color: var(--c-body-light);
+}
+
+.custom-textarea {
+  width: 100%;
+  min-height: 120px;
+  border: 2px solid var(--c-brand);
+  border-radius: 8px;
+  padding: 10px;
+  font-size: 16px;
+  resize: none; /* Prevent resizing */
+  background-color: #f8f9fa00; /* Light gray background */
+}
+
+.custom-textarea:focus {
+  border-color: var(--c-brand-dark); /* Darker blue when focused */
+  outline: none; /* Remove default outline */
+  box-shadow: 0 0 8px rgba(255, 161, 200, 0.5); /* Soft glow effect */
 }
 
 /* HERO */
@@ -340,10 +356,9 @@ img {
 .modal-content {
   width: 80%;
   margin: 0 auto;
-  border-radius: 5%;
 }
 .modal-body {
-  padding: 0;
+  padding: 32px;
 }
 
 .btn-close {
@@ -384,12 +399,12 @@ h1 {
 }
 .form-control {
   background-color: inherit;
-  color: #fff;
   padding-left: 0;
   border: 0;
   border-radius: 0;
-  border-bottom: 1px solid #fff;
+  border-bottom: 1px var(--c-brand);
 }
+
 .myform .btn {
   width: 100%;
   font-weight: 800;
