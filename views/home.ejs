@@ -279,6 +279,38 @@
         </div>
       </div>
  </div>
+
+
+ <!-- 3rd Party API here  -->
+ <div
+ class="col-12 text-center"
+ data-aos="fade-down"
+ data-aos-delay="150"
+>
+
+<div class="col-12 text-center" data-aos="fade-down" data-aos-delay="150">
+  <h2 class="fw-bold">Random Cat Images</h2>
+  <div class="container">
+      <div class="row justify-content-center">
+          <% catImages.forEach(cat => { %>
+              <div class="col-md-4 mb-3">
+                  <div class="card">
+                      <img src="<%= cat.url %>" class="card-img-top" alt="Random Cat" style="height: 250px; object-fit: cover;">
+                      <div class="card-body">
+                          <p class="card-text">Here's a cute cat for you! 🐱</p>
+                      </div>
+                  </div>
+              </div>
+          <% }) %>
+      </div>
+  </div>
+</div>
+
+
+
+</div>
+
+
  <!-- Accordion -->
  <div
  class="col-12 text-center"
