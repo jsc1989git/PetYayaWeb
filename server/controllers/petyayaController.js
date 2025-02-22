@@ -32,11 +32,6 @@ exports.addPost = async(req, res) => {
     res.redirect('/dashboard')
 }
 
-exports.editPostForm = async(req, res) => {
-    const post = await Posts.findById(req.params.id);
-    res.render('edit-post', {post});
-}
-
 exports.editPost = async(req, res) => {
     const post = await Posts.findByIdAndUpdate(req.params.id, { content: req.body.post.content }, { new: true });
     res.redirect('/dashboard');
