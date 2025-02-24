@@ -133,7 +133,7 @@ document
       loginModal.hide();
 
       // Redirect to home.html
-      window.location.href = "/dashboard";
+      window.location.href = "/feed";
     } else {
       // Show error message
       alert("Incorrect email or password. Please try again.");

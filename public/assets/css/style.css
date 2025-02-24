@@ -209,6 +209,11 @@ img {
   z-index: 0;
 }
 
+#map {
+  height: 300px;
+  width: 300px;
+}
+
 /* SECTION TITLE */
 .section-title {
   margin-bottom: 60px;
