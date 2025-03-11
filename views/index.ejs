@@ -51,19 +51,22 @@
             <li class="nav-item">
               <a class="nav-link" href="#contact">Contact</a>
             </li>
-            <li class="nav-item">  
-              <% if (!user) { %>
-                <a href="/auth/google" class="login-btn nav-link">
-                  <i class="fab fa-google"></i> Login
-                </a>
-              <% } else { %>
-                <div class="user-menu">
-                  <img src="<%= user.avatar %>" alt="<%= user.name %>" class="avatar">
+            <% if (user) { %>
+              <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                   <span><%= user.name %></span>
-                  <a href="/auth/logout" class="logout-btn nav-link">Logout</a>
-                </div>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                  <li><a class="dropdown-item" href="/auth/logout">Logout</a></li>
+                </ul>
+              </li>
+              <% } else { %>
+              <li class="nav-item">
+                <a href="/auth/google" class="nav-link d-flex align-items-center">
+                  <i class="fab fa-google me-2"></i> Login
+                </a>
+              </li>
               <% } %>
-            </li>
            
           </ul>
           <button class="btn btn-lg btn-brand ms-lg-3" data-bs-toggle="modal" data-bs-target="#ModalSignUpForm">Sign up</button>
