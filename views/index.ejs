@@ -51,6 +51,19 @@
             <li class="nav-item">
               <a class="nav-link" href="#contact">Contact</a>
             </li>
+            <li class="nav-item">  
+              <% if (!user) { %>
+                <a href="/auth/google" class="login-btn nav-link">
+                  <i class="fab fa-google"></i> Login
+                </a>
+              <% } else { %>
+                <div class="user-menu">
+                  <img src="<%= user.avatar %>" alt="<%= user.name %>" class="avatar">
+                  <span><%= user.name %></span>
+                  <a href="/auth/logout" class="logout-btn nav-link">Logout</a>
+                </div>
+              <% } %>
+            </li>
            
           </ul>
           <button class="btn btn-lg btn-brand ms-lg-3" data-bs-toggle="modal" data-bs-target="#ModalSignUpForm">Sign up</button>
