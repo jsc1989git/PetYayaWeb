@@ -138,8 +138,9 @@
               <button class="btn btn-sm btn-brand" onclick="likeReply('<%= reply._id %>')">Like (<span id="like-reply-<%= reply._id %>"><%= reply.likes %></span>)</button>
               <button class="btn btn-sm btn-brand" data-bs-toggle="modal" data-bs-target="#ReplyForm-<%= reply._id %>">Reply</button>
               <a href="#" class="btn btn-sm btn-brand" data-bs-toggle="modal" data-bs-target="#EditForm-<%= reply._id %>">Edit</a>
-              <form class="d-inline" action="/delete-reply/<%= reply._id %>?_method=DELETE" method="POST" onsubmit="return confirm('Delete this reply?')">
+              <form class="d-inline" action="/delete-reply/<%= comment._id %>/<%= reply._id %>?_method=DELETE" method="POST" onsubmit="return confirm('Delete this reply?')">
                 <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+              </form>              
               </form>
             </div>
           </div>
