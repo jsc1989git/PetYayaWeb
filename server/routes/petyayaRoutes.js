@@ -13,7 +13,10 @@ router.get('/feed', petyayaController.posts);
 router.post('/add-post', petyayaController.addPost);
 
 // Route to edit an existing post
-router.put('/edit-post/:id', petyayaController.editPost);
+router.post('/edit-post/:id', async (req, res) => {
+    await Post.findByIdAndUpdate(req.params.id, { content: req.body.content });
+    res.redirect('/feed');
+  });
 
 // Route to delete a post
 router.delete('/delete-post/:id', petyayaController.deletePost);
@@ -25,7 +28,13 @@ router.post('/like-post/:id', petyayaController.likePost);
 router.post('/add-comment/:id', petyayaController.addComment);
 
 // Route to edit a comment
-router.put('/edit-comment/:commentId', petyayaController.editComment);
+router.post('/edit-comment/:id', async (req, res) => {
+    await Post.updateOne(
+      { "comments._id": req.params.id },
+      { $set: { "comments.$.text": req.body.content } }
+    );
+    res.redirect('/feed');
+  });
 
 // Route to delete a comment
 router.delete("/delete-comment/:commentId", async (req, res) => {
@@ -60,7 +69,14 @@ router.post('/add-reply/:commentId', petyayaController.addReply);
 router.post('/like-reply/:id', petyayaController.likeReply);
 
 // Route to edit a reply
-router.put('/edit-reply/:id', petyayaController.editReply);
+router.post('/edit-reply/:id', async (req, res) => {
+    await Post.updateOne(
+      { "comments.replies._id": req.params.id },
+      { $set: { "comments.$[].replies.$[reply].text": req.body.content } },
+      { arrayFilters: [{ "reply._id": req.params.id }] }
+    );
+    res.redirect('/feed');
+  });
 
 // Route to delete a reply
 router.delete("/delete-reply/:commentId/:replyId", async (req, res) => {
