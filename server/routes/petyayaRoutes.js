@@ -23,5 +23,26 @@ router.post('/like-post/:id', petyayaController.likePost);
 // Route to add a comment to a post
 router.post('/add-comment/:id', petyayaController.addComment);
 
+// Route to edit a comment
+router.put('/edit-comment/:commentId', petyayaController.editComment);
+
+// Route to delete a comment
+router.delete('/delete-comment/:commentId', petyayaController.deleteComment);
+
+// Route to like a comment
+router.post('/like-comment/:commentId', petyayaController.likeComment);
+
+// Route to add a reply to a comment
+router.post('/add-reply/:commentId', petyayaController.addReply);
+
+// Route to like a reply
+router.post('/like-reply/:id', petyayaController.likeReply);
+
+// Route to edit a reply
+router.put('/edit-reply/:id', petyayaController.editReply);
+
+// Route to delete a reply
+router.delete('/delete-reply/:id', petyayaController.deleteReply);
+
 // Export the router
 module.exports = router;

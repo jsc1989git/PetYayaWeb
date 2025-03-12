@@ -83,11 +83,108 @@ exports.likePost = async (req, res) => {
 exports.addComment = async (req, res) => {
     try {
         const post = await Posts.findById(req.params.id);
-        post.comments.push({ text: req.body.comment }); // Add new comment to post
+        post.comments.push({ text: req.body.comment, likes: 0, replies: [] }); // Add new comment to post
         await post.save(); // Save updated post
         res.redirect('/feed');
     } catch (error) {
         console.error('Error adding comment:', error);
         res.redirect('/feed');
     }
+};
+
+// Edit a comment
+exports.editComment = async (req, res) => {
+    try {
+        const post = await Posts.findOne({ 'comments._id': req.params.commentId });
+        if (post) {
+            const comment = post.comments.id(req.params.commentId);
+            comment.text = req.body.comment;
+            await post.save();
+            res.redirect('/feed');
+        } else {
+            res.status(404).json({ error: 'Comment not found' });
+        }
+    } catch (error) {
+        console.error('Error editing comment:', error);
+        res.redirect('/feed');
+    }
+};
+
+// Delete a comment
+exports.deleteComment = async (req, res) => {
+    try {
+        const post = await Posts.findOne({ 'comments._id': req.params.commentId });
+        if (post) {
+            post.comments.id(req.params.commentId).remove();
+            await post.save();
+            res.redirect('/feed');
+        } else {
+            res.status(404).json({ error: 'Comment not found' });
+        }
+    } catch (error) {
+        console.error('Error deleting comment:', error);
+        res.redirect('/feed');
+    }
+};
+
+// Like a comment
+exports.likeComment = async (req, res) => {
+    try {
+        const post = await Posts.findOne({ 'comments._id': req.params.commentId });
+        if (post) {
+            const comment = post.comments.id(req.params.commentId);
+            comment.likes += 1;
+            await post.save();
+            res.json({ likes: comment.likes });
+        } else {
+            res.status(404).json({ error: 'Comment not found' });
+        }
+    } catch (error) {
+        console.error('Error liking comment:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};
+
+// Add a reply to a comment
+exports.addReply = async (req, res) => {
+    try {
+        const post = await Posts.findOne({ 'comments._id': req.params.commentId });
+        if (post) {
+            const comment = post.comments.id(req.params.commentId);
+            comment.replies.push({ text: req.body.reply, likes: 0 });
+            await post.save();
+            res.redirect('/feed');
+        } else {
+            res.status(404).json({ error: 'Comment not found' });
+        }
+    } catch (error) {
+        console.error('Error adding reply:', error);
+        res.redirect('/feed');
+    }
+};
+
+// Like a reply
+exports.likeReply = async (req, res) => {
+    const post = await Posts.findOne({ 'comments.replies._id': req.params.id });
+    if (post) {
+        const comment = post.comments.find(c => c.replies.id(req.params.id));
+        const reply = comment.replies.id(req.params.id);
+        reply.likes += 1;
+        await post.save();
+        res.json({ likes: reply.likes });
+    } else {
+        res.status(404).json({ error: 'Reply not found' });
+    }
+};
+
+// Edit a reply
+exports.editReply = async (req, res) => {
+    await Posts.updateOne({ 'comments.replies._id': req.params.id }, { $set: { 'comments.$.replies.$[reply].text': req.body.reply } }, { arrayFilters: [{ 'reply._id': req.params.id }] });
+    res.redirect('/feed');
+};
+
+// Delete a reply
+exports.deleteReply = async (req, res) => {
+    await Posts.updateOne({}, { $pull: { 'comments.$[].replies': { _id: req.params.id } } });
+    res.redirect('/feed');
 };
