@@ -69,8 +69,9 @@
 
   <div class="container mt-3">
     <% posts.forEach(post => { %>
+      
       <!-- Post Container -->
-      <div class="list-group mb-4 p-3 border rounded bg-white">
+      <div class="post-container mb-4 p-3 border rounded bg-white">
         <div class="d-flex align-items-center">
           <!-- Avatar -->
           <img src="https://avataaars.io/?avatarStyle=Circle&topType=ShortHairShaggyMullet&accessoriesType=Sunglasses&hairColor=SilverGray"
@@ -95,9 +96,9 @@
   
       <!-- Comments Section -->
       <% post.comments.forEach(comment => { %>
-        <div class="ms-4 mt-3 p-3 border rounded bg-light">
+        <div class="comment-container ms-4 mb-3 p-3 border rounded bg-light">
           <div class="d-flex align-items-center">
-            <!-- Avatar for Comments -->
+            <!-- Avatar -->
             <img src="https://avataaars.io/?avatarStyle=Circle&topType=ShortHairShortFlat&accessoriesType=Blank&hairColor=BrownDark"
               class="rounded-circle me-2" width="30" height="30" alt="User Avatar">
             <div>
@@ -120,9 +121,9 @@
   
         <!-- Replies Section -->
         <% comment.replies.forEach(reply => { %>
-          <div class="ms-5 mt-2 p-2 border rounded bg-white">
+          <div class="reply-container ms-5 mb-3 p-3 border rounded bg-white">
             <div class="d-flex align-items-center">
-              <!-- Avatar for Replies -->
+              <!-- Avatar -->
               <img src="https://avataaars.io/?avatarStyle=Circle&topType=LongHairStraight&accessoriesType=Blank&hairColor=Blonde"
                 class="rounded-circle me-2" width="25" height="25" alt="User Avatar">
               <div>
@@ -135,66 +136,19 @@
             <!-- Reply Actions -->
             <div class="mt-2 d-flex justify-content-end gap-2">
               <button class="btn btn-sm btn-brand" onclick="likeReply('<%= reply._id %>')">Like (<span id="like-reply-<%= reply._id %>"><%= reply.likes %></span>)</button>
+              <button class="btn btn-sm btn-brand" data-bs-toggle="modal" data-bs-target="#ReplyForm-<%= reply._id %>">Reply</button>
+              <a href="#" class="btn btn-sm btn-brand" data-bs-toggle="modal" data-bs-target="#EditForm-<%= reply._id %>">Edit</a>
               <form class="d-inline" action="/delete-reply/<%= reply._id %>?_method=DELETE" method="POST" onsubmit="return confirm('Delete this reply?')">
                 <button type="submit" class="btn btn-sm btn-danger">Delete</button>
               </form>
             </div>
           </div>
         <% }); %>
-
-         <!-- Edit Modal -->
-         <div class="modal fade" id="EditForm-<%= post._id %>" tabindex="-1" aria-labelledby="ModalFormLabel" aria-hidden="true">
-          <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-              <div class="modal-body">
-                <button type="reset" class="btn-close" data-bs-dismiss="modal"></button>
-                <h2 class="text-center">Edit Post</h2>
-                <form action="/edit-post/<%= post._id %>?_method=PUT" method="POST">
-                  <div class="form-group">
-                    <textarea name="post[content]" class="form-control" rows="3"><%= post.content %></textarea>
-                  </div>
-                  <div class="form-group d-flex justify-content-end gap-2 mt-4">
-                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-brand">Update</button>
-                  </div>
-                </form>
-              </div>
-            </div>
-          </div>
-        </div>
   
-        <!-- Reply Modal -->
-        <div class="modal fade" id="ReplyForm-<%= comment._id %>" tabindex="-1">
-          <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-              <div class="modal-body">
-                <h2>Add Reply</h2>
-                <form action="/add-reply/<%= comment._id %>" method="POST">
-                  <textarea name="reply" class="form-control"></textarea>
-                  <button type="submit" class="btn btn-brand mt-2">Submit</button>
-                </form>
-              </div>
-            </div>
-          </div>
-        </div>
       <% }); %>
   
-      <!-- Comment Modal -->
-      <div class="modal fade" id="CommentForm-<%= post._id %>" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered">
-          <div class="modal-content">
-            <div class="modal-body">
-              <h2>Add Comment</h2>
-              <form action="/add-comment/<%= post._id %>" method="POST">
-                <textarea name="comment" class="form-control"></textarea>
-                <button type="submit" class="btn btn-brand mt-2">Submit</button>
-              </form>
-            </div>
-          </div>
-        </div>
-      </div>
     <% }); %>
-  </div>  
+  </div>
   
   <script>
     function likePost(postId) {
