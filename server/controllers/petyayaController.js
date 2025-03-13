@@ -124,14 +124,36 @@ exports.addReplyToComment = async (req, res) => {
 };
 
 exports.likeReply = async (req, res) => {
-    const post = await Posts.findOne({ 'comments.replies._id': req.params.id });
-    if (post) {
-        const reply = post.comments.find(c => c.replies.id(req.params.id)).replies.id(req.params.id);
+    try {
+        const post = await Posts.findOne({ 'comments.replies._id': req.params.replyId });
+
+        if (!post) {
+            return res.status(404).json({ error: 'Reply not found' });
+        }
+
+        // Find the comment that contains the reply
+        const comment = post.comments.find(comment => comment.replies.id(req.params.replyId));
+
+        if (!comment) {
+            return res.status(404).json({ error: 'Comment not found' });
+        }
+
+        // Find the reply inside the comment
+        const reply = comment.replies.id(req.params.replyId);
+
+        if (!reply) {
+            return res.status(404).json({ error: 'Reply not found' });
+        }
+
+        // Increment like count
         reply.likes += 1;
         await post.save();
+
         res.json({ likes: reply.likes });
-    } else {
-        res.status(404).json({ error: 'Reply not found' });
+
+    } catch (error) {
+        console.error("Error liking reply:", error);
+        res.status(500).json({ error: 'Internal server error' });
     }
 };
 

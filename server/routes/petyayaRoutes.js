@@ -66,7 +66,7 @@ router.post('/like-comment/:commentId', petyayaController.likeComment);
 router.post("/reply-to-comment/:commentId", petyayaController.addReplyToComment);
 
 // Like a reply
-router.post('/like-reply/:id', petyayaController.likeReply);
+router.post('/like-reply/:replyId', petyayaController.likeReply);
 
 // Edit a reply
 router.post('/edit-reply/:id', async (req, res) => {
