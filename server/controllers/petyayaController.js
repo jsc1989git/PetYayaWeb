@@ -159,34 +159,40 @@ exports.likeComment = async (req, res) => {
 
 // Add a reply to a comment
 exports.addReplyToComment = async (req, res) => {
-    try {
-        const { text } = req.body; // Extract text properly
-        if (!text || text.trim() === "") {
-            return res.status(400).json({ success: false, message: "Reply text cannot be empty" });
-        }
+    const { commentId } = req.params;
+    const { text } = req.body;
 
-        const postId = req.params.postId;
-        const commentId = req.params.commentId;
+    console.log("Received request to reply to comment:", commentId);
+    console.log("Reply text:", text);
 
-        const post = await Post.findById(postId);
-        if (!post) {
-            return res.status(404).json({ success: false, message: "Post not found" });
-        }
-
-        const comment = post.comments.id(commentId);
-        if (!comment) {
-            return res.status(404).json({ success: false, message: "Comment not found" });
-        }
-
-        // Push new reply
-        comment.replies.push({ text });
-
-        await post.save();
-        res.json({ success: true, message: "Reply added successfully" });
-    } catch (error) {
-        console.error("Error adding reply:", error);
-        res.status(500).json({ success: false, message: "Internal server error" });
+    if (!text) {
+        console.log("Error: Reply text is empty.");
+        return res.status(400).send("Reply text cannot be empty!");
     }
+
+    // Find the post that contains the comment
+    const post = await Posts.findOne({ "comments._id": commentId });
+
+    if (!post) {
+        console.log("Error: Comment not found inside any post.");
+        return res.status(404).send("Comment not found!");
+    }
+
+    // Find the comment
+    const comment = post.comments.id(commentId);
+    if (!comment) {
+        console.log("Error: Comment ID not found.");
+        return res.status(404).send("Comment not found!");
+    }
+
+    // Add reply
+    comment.replies.push({ text, likes: 0 });
+
+    // Save post
+    await post.save();
+    console.log("Reply added successfully!");
+
+    res.redirect('/feed');
 };
 
 // Like a reply
@@ -218,33 +224,28 @@ exports.deleteReply = async (req, res) => {
 exports.addReplyToReply = async (req, res) => {
     try {
         const { text } = req.body;
-        if (!text || text.trim() === "") {
-            return res.status(400).json({ success: false, message: "Reply text cannot be empty" });
+        if (!text.trim()) {
+            return res.status(400).json({ success: false, message: "Reply text cannot be empty!" });
         }
 
-        const postId = req.params.postId;
-        const commentId = req.params.commentId;
-        const replyId = req.params.replyId;
-
-        const post = await Post.findById(postId);
+        const post = await Posts.findById(req.params.postId);
         if (!post) {
             return res.status(404).json({ success: false, message: "Post not found" });
         }
 
-        const comment = post.comments.id(commentId);
+        const comment = post.comments.id(req.params.commentId);
         if (!comment) {
             return res.status(404).json({ success: false, message: "Comment not found" });
         }
 
-        const reply = comment.replies.id(replyId);
+        const reply = comment.replies.id(req.params.replyId);
         if (!reply) {
             return res.status(404).json({ success: false, message: "Reply not found" });
         }
 
-        // Push new reply inside the reply
         comment.replies.push({ text });
-
         await post.save();
+
         res.json({ success: true, message: "Reply added successfully" });
     } catch (error) {
         console.error("Error adding reply to reply:", error);
