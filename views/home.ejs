@@ -67,120 +67,105 @@
     </div>
   </div>
 
-  <div class="container mt-3">
-    <% posts.forEach(post => { %>
-      
-      <!-- Post Container -->
-      <div class="post-container mb-4 p-3 border rounded bg-white">
+<!-- Main Container -->
+<div class="container mt-3">
+  <% posts.forEach(post => { %>
+    
+    <!-- Post Container -->
+    <div class="post-container mb-4 p-3 border rounded bg-white">
+      <div class="d-flex align-items-center">
+        <!-- Avatar -->
+        <img src="https://avataaars.io/?avatarStyle=Circle&topType=ShortHairShaggyMullet&accessoriesType=Sunglasses&hairColor=SilverGray"
+          class="rounded-circle me-2" width="40" height="40" alt="User Avatar">
+        <div>
+          <strong><%= post.content %></strong>
+          <small class="d-block opacity-50"><%= new Date(post.createdAt).toISOString().slice(0, 19).replace("T", " ") %></small>
+        </div>
+      </div>
+
+      <!-- Post Actions -->
+      <div class="mt-2 d-flex justify-content-end gap-2">
+        <button class="btn btn-sm btn-brand" onclick="likePost('<%= post._id %>')">Like (<span id="like-count-<%= post._id %>"><%= post.likes %></span>)</button>
+        <button class="btn btn-sm btn-brand" data-bs-toggle="modal" data-bs-target="#commentModal-<%= post._id %>">Comment</button>
+        <a href="#" class="btn btn-sm btn-brand" onclick="openEditModal('<%= post._id %>', '<%= post.content %>', 'post')">Edit</a>
+        <form class="d-inline" action="/delete-post/<%= post._id %>?_method=DELETE" method="POST" onsubmit="return confirm('Delete this post?')">
+          <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Comments Section -->
+    <% post.comments.forEach(comment => { %>
+      <div class="comment-container ms-4 mb-3 p-3 border rounded bg-light">
         <div class="d-flex align-items-center">
-          <!-- Avatar -->
-          <img src="https://avataaars.io/?avatarStyle=Circle&topType=ShortHairShaggyMullet&accessoriesType=Sunglasses&hairColor=SilverGray"
-            class="rounded-circle me-2" width="40" height="40" alt="User Avatar">
+          <img src="https://avataaars.io/?avatarStyle=Circle&topType=ShortHairShortFlat&accessoriesType=Blank&hairColor=BrownDark"
+            class="rounded-circle me-2" width="30" height="30" alt="User Avatar">
           <div>
-            <!-- Post Content -->
-            <strong><%= post.content %></strong>
-            <small class="d-block opacity-50"><%= new Date(post.createdAt).toISOString().slice(0, 19).replace("T", " ") %></small>
+            <strong><%= comment.text %></strong>
+            <small class="d-block opacity-50"><%= new Date(comment.createdAt).toISOString().slice(0, 19).replace("T", " ") %></small>
           </div>
         </div>
-  
-        <!-- Post Actions -->
+
+        <!-- Comment Actions -->
         <div class="mt-2 d-flex justify-content-end gap-2">
-          <button class="btn btn-sm btn-brand" onclick="likePost('<%= post._id %>')">Like (<span id="like-count-<%= post._id %>"><%= post.likes %></span>)</button>
-          <button class="btn btn-sm btn-brand" data-bs-toggle="modal" data-bs-target="#commentModal-<%= post._id %>">Comment</button>
-          <a href="#" class="btn btn-sm btn-brand" onclick="openEditModal('<%= post._id %>', '<%= post.content %>', 'post')">Edit</a>
-          <form class="d-inline" action="/delete-post/<%= post._id %>?_method=DELETE" method="POST" onsubmit="return confirm('Delete this post?')">
+          <button class="btn btn-sm btn-brand" onclick="likeComment('<%= comment._id %>')">Like (<span id="like-count-<%= comment._id %>"><%= comment.likes %></span>)</button>
+          <button onclick="openReplyModal('<%= comment._id %>', 'comment')" class="btn btn-sm btn-brand">Reply</button>
+          <a href="#" class="btn btn-sm btn-brand" onclick="openEditModal('<%= comment._id %>', '<%= comment.text %>', 'comment')">Edit</a>
+          <form class="d-inline" action="/delete-comment/<%= comment._id %>?_method=DELETE" method="POST" onsubmit="return confirm('Delete this comment?')">
             <button type="submit" class="btn btn-sm btn-danger">Delete</button>
           </form>
         </div>
       </div>
-  
-      <!-- Comments Section -->
-      <% post.comments.forEach(comment => { %>
-        <div class="comment-container ms-4 mb-3 p-3 border rounded bg-light">
+
+      <!-- Replies Section -->
+      <% comment.replies.forEach(reply => { %>
+        <div class="reply-container ms-5 mb-3 p-3 border rounded bg-white">
           <div class="d-flex align-items-center">
-            <!-- Avatar -->
-            <img src="https://avataaars.io/?avatarStyle=Circle&topType=ShortHairShortFlat&accessoriesType=Blank&hairColor=BrownDark"
-              class="rounded-circle me-2" width="30" height="30" alt="User Avatar">
+            <img src="https://avataaars.io/?avatarStyle=Circle&topType=LongHairStraight&accessoriesType=Blank&hairColor=Blonde"
+              class="rounded-circle me-2" width="25" height="25" alt="User Avatar">
             <div>
-              <!-- Comment Content -->
-              <strong><%= comment.text %></strong>
-              <small class="d-block opacity-50"><%= new Date(comment.createdAt).toISOString().slice(0, 19).replace("T", " ") %></small>
+              <strong><%= reply.text %></strong>
+              <small class="d-block opacity-50"><%= new Date(reply.createdAt).toISOString().slice(0, 19).replace("T", " ") %></small>
             </div>
           </div>
-  
-          <!-- Comment Actions -->
+
+          <!-- Reply Actions -->
           <div class="mt-2 d-flex justify-content-end gap-2">
-            <button class="btn btn-sm btn-brand" onclick="likeComment('<%= comment._id %>')">Like (<span id="like-count-<%= comment._id %>"><%= comment.likes %></span>)</button>
-            <button onclick="openReplyModal('<%= comment._id %>', 'comment')" class="btn btn-sm btn-brand">
-              Reply
-          </button>
-            <a href="#" class="btn btn-sm btn-brand" onclick="openEditModal('<%= comment._id %>', '<%= comment.text %>', 'comment')">Edit</a>
-            <form class="d-inline" action="/delete-comment/<%= comment._id %>?_method=DELETE" method="POST" onsubmit="return confirm('Delete this comment?')">
+            <button class="btn btn-sm btn-brand" onclick="likeReply('<%= reply._id %>')">Like (<span id="like-reply-<%= reply._id %>"><%= reply.likes %></span>)</button>
+            <button onclick="openReplyModal('<%= reply._id %>', 'reply')" class="btn btn-sm btn-brand">Reply</button>
+            <a href="#" class="btn btn-sm btn-brand" onclick="openEditModal('<%= reply._id %>', '<%= reply.text %>', 'reply')">Edit</a>
+            <form class="d-inline" action="/delete-reply/<%= comment._id %>/<%= reply._id %>?_method=DELETE" method="POST" onsubmit="return confirm('Delete this reply?')">
               <button type="submit" class="btn btn-sm btn-danger">Delete</button>
             </form>
           </div>
         </div>
-  
-        <!-- Replies Section -->
-        <% comment.replies.forEach(reply => { %>
-          <div class="reply-container ms-5 mb-3 p-3 border rounded bg-white">
-            <div class="d-flex align-items-center">
-              <!-- Avatar -->
-              <img src="https://avataaars.io/?avatarStyle=Circle&topType=LongHairStraight&accessoriesType=Blank&hairColor=Blonde"
-                class="rounded-circle me-2" width="25" height="25" alt="User Avatar">
-              <div>
-                <!-- Reply Content -->
-                <strong><%= reply.text %></strong>
-                <small class="d-block opacity-50"><%= new Date(reply.createdAt).toISOString().slice(0, 19).replace("T", " ") %></small>
-              </div>
-            </div>
-  
-            <!-- Reply Actions -->
-            <div class="mt-2 d-flex justify-content-end gap-2">
-              <button class="btn btn-sm btn-brand" onclick="likeReply('<%= reply._id %>')">Like (<span id="like-reply-<%= reply._id %>"><%= reply.likes %></span>)</button>
-              <% comment.replies.forEach(reply => { %>
-                
-            <% }) %>
-              <button onclick="openReplyModal('<%= reply._id %>', 'reply')" class="btn btn-sm btn-brand">
-                Reply
-              </button>
-              <a href="#" class="btn btn-sm btn-brand" onclick="openEditModal('<%= reply._id %>', '<%= reply.text %>', 'reply')">Edit</a>
-              <form class="d-inline" action="/delete-reply/<%= comment._id %>/<%= reply._id %>?_method=DELETE" method="POST" onsubmit="return confirm('Delete this reply?')">
-                <button type="submit" class="btn btn-sm btn-danger">Delete</button>
-              </form>              
-              </form>
-            </div>
-          </div>
-        <% }); %>
-  
       <% }); %>
-  
     <% }); %>
-  </div>
+  <% }); %>
+</div>
 
   <!-- Edit Modal -->
-  <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header d-flex justify-content-center position-relative">
-          <h5 class="modal-title mx-auto" id="editModalLabel">Edit</h5>
-          <button type="button" class="btn-close position-absolute top-0 end-0 m-2" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>             
-        <form id="editForm" method="POST">
-          <div class="modal-body">
-            <textarea id="editContent" name="content" class="form-control"></textarea>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cancel</button>
-            <button type="submit" class="btn btn-brand">Save Changes</button>
-          </div>
-        </form>
+<div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header d-flex justify-content-center position-relative">
+        <h5 class="modal-title mx-auto" id="editModalLabel">Edit</h5>
+        <button type="button" class="btn-close position-absolute top-0 end-0 m-2" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
+      <form id="editForm" method="POST">
+        <div class="modal-body">
+          <textarea id="editContent" name="content" class="form-control"></textarea>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-brand">Save Changes</button>
+        </div>
+      </form>
     </div>
   </div>
-  
-  <% posts.forEach(post => { %> 
+</div>
 
+<% posts.forEach(post => { %>
   <!-- Comment Modal -->
   <div class="modal fade" id="commentModal-<%= post._id %>" tabindex="-1" aria-labelledby="commentModalLabel-<%= post._id %>" aria-hidden="true">
     <div class="modal-dialog">
@@ -201,124 +186,56 @@
       </div>
     </div>
   </div>
-</div>
 <% }); %>
 
+<!-- Reply Modal -->
 <div class="modal fade" id="replyModal" tabindex="-1" aria-labelledby="replyModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title text-center w-100" id="replyModalLabel">Reply</h5>
+      <div class="modal-header d-flex justify-content-center position-relative">
+        <h5 class="modal-title mx-auto" id="replyModalLabel">Reply</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <form id="replyForm" method="POST">
         <div class="modal-body">
-            <textarea id="replyContent" name="text" class="form-control" placeholder="Write your reply..."></textarea>
+          <textarea id="replyContent" name="text" class="form-control" placeholder="Write your reply..."></textarea>
         </div>
         <div class="modal-footer">
-            <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cancel</button>
-            <button type="submit" class="btn btn-brand">Post Reply</button>
+          <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-brand">Post Reply</button>
         </div>
-    </form>    
+      </form>
     </div>
   </div>
 </div>
-  
-  <script>
-    function likePost(postId) {
-      fetch(`/like-post/${postId}`, { method: 'POST' })
-        .then(response => response.json())
-        .then(data => {
-          document.getElementById(`like-count-${postId}`).innerText = data.likes;
-        });
-    }
-  
-    function likeComment(commentId) {
-      fetch(`/like-comment/${commentId}`, { method: 'POST' })
-        .then(response => response.json())
-        .then(data => {
-          document.getElementById(`like-count-${commentId}`).innerText = data.likes;
-        });
-    }
-  
-    function likeReply(replyId) {
-      fetch(`/like-reply/${replyId}`, { method: 'POST' })
-        .then(response => response.json())
-        .then(data => {
-          document.getElementById(`like-reply-${replyId}`).innerText = data.likes;
-        });
-    }
 
-    function openEditModal(id, content, type) {
-    document.getElementById('editContent').value = content; // Fill textarea
-    let form = document.getElementById('editForm');
+<script>
+  // Like Functions
+  function updateLikeCount(id, type) {
+    fetch(`/${type}/${id}`, { method: 'POST' })
+      .then(response => response.json())
+      .then(data => {
+        document.getElementById(`like-count-${id}`).innerText = data.likes;
+      });
+  }
+  function likePost(postId) { updateLikeCount(postId, 'like-post'); }
+  function likeComment(commentId) { updateLikeCount(commentId, 'like-comment'); }
+  function likeReply(replyId) { updateLikeCount(replyId, 'like-reply'); }
 
-    // Set the correct update route based on type
-    if (type === 'post') {
-      form.action = `/edit-post/${id}`;
-    } else if (type === 'comment') {
-      form.action = `/edit-comment/${id}`;
-    } else if (type === 'reply') {
-      form.action = `/edit-reply/${id}`;
-    }
-
-    // Show the modal
-    let modal = new bootstrap.Modal(document.getElementById('editModal'));
-    modal.show();
+  // Open Edit Modal
+  function openEditModal(id, content, type) {
+    document.getElementById('editContent').value = content;
+    document.getElementById('editForm').action = `/edit-${type}/${id}`;
+    new bootstrap.Modal(document.getElementById('editModal')).show();
   }
 
-    function openReplyModal(parentId, type) {
-    document.getElementById('replyContent').value = ''; // Clear previous content
-    let form = document.getElementById('replyForm');
-
-    // Set the correct reply route based on type
-    if (type === 'comment') {
-      form.action = `/reply-to-comment/${parentId}`;
-    } else if (type === 'reply') {
-      form.action = `/reply-to-reply/${parentId}`;
-    }
-
-    // Show the modal
-    let modal = new bootstrap.Modal(document.getElementById('replyModal'));
-    modal.show();
+  // Open Reply Modal
+  function openReplyModal(parentId, type) {
+    document.getElementById('replyContent').value = '';
+    document.getElementById('replyForm').action = `/reply-to-${type}/${parentId}`;
+    new bootstrap.Modal(document.getElementById('replyModal')).show();
   }
-
-    function openReplyModal(replyId, parentType) {
-      // Ensure modal elements exist
-      const replyModal = new bootstrap.Modal(document.getElementById('replyModal'));
-      const replyForm = document.getElementById('replyForm');
-      const replyContent = document.getElementById('replyContent');
-
-      if (!replyForm || !replyContent) {
-          console.error("Reply form or content field not found!");
-          return;
-      }
-
-      // Set the form action dynamically
-      if (parentType === 'comment') {
-          replyForm.action = `/reply-to-comment/${replyId}`;
-      } else if (parentType === 'reply') {
-          replyForm.action = `/reply-to-reply/${replyId}`;
-      }
-
-      // Clear previous input
-      replyContent.value = '';
-
-      // Show modal
-      replyModal.show();
-  }
-
-    function openReplyModal(commentId) {
-      document.getElementById("replyContent").value = ""; // Clear input
-      let form = document.getElementById("replyForm");
-      form.action = `/reply-to-comment/${commentId}`; // Set the correct action
-
-      // Show modal
-      let modal = new bootstrap.Modal(document.getElementById("replyModal"));
-      modal.show();
-  }
-
-  </script>  
+</script> 
 
 <!-- Home -->
 <div

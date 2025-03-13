@@ -1,20 +1,32 @@
 const mongoose = require("mongoose");
 
-const ReplySchema = new mongoose.Schema({
-    text: { type: String, required: true },
-    likes: { type: Number, default: 0 }
-}, { timestamps: true });
-
-const CommentSchema = new mongoose.Schema({
+// Schema for replies
+const ReplySchema = new mongoose.Schema(
+  {
     text: { type: String, required: true },
     likes: { type: Number, default: 0 },
-    replies: [ReplySchema] // Embed replies inside comments
-}, { timestamps: true });
+  },
+  { timestamps: true }
+);
 
-const PostSchema = new mongoose.Schema({
+// Schema for comments (including embedded replies)
+const CommentSchema = new mongoose.Schema(
+  {
+    text: { type: String, required: true },
+    likes: { type: Number, default: 0 },
+    replies: [ReplySchema], // Nested replies inside comments
+  },
+  { timestamps: true }
+);
+
+// Schema for posts (including embedded comments)
+const PostSchema = new mongoose.Schema(
+  {
     content: { type: String, required: true },
     likes: { type: Number, default: 0 },
-    comments: [CommentSchema] // Embed comments inside posts
-}, { timestamps: true });
+    comments: [CommentSchema], // Nested comments inside posts
+  },
+  { timestamps: true }
+);
 
 module.exports = mongoose.model("Post", PostSchema);

@@ -6,51 +6,49 @@ const Post = require('../../models/posts');
 // Home route (index page)
 router.get('/', petyayaController.index);
 
+// ---------------------- Post Routes ----------------------
+
 // Feed page that displays all posts
 router.get('/feed', petyayaController.posts);
 
-// Route to add a new post
+// Add a new post
 router.post('/add-post', petyayaController.addPost);
 
-// Route to edit an existing post
+// Edit a post
 router.post('/edit-post/:id', async (req, res) => {
     await Post.findByIdAndUpdate(req.params.id, { content: req.body.content });
     res.redirect('/feed');
-  });
+});
 
-// Route to delete a post
+// Delete a post
 router.delete('/delete-post/:id', petyayaController.deletePost);
 
-// Route to like a post
+// Like a post
 router.post('/like-post/:id', petyayaController.likePost);
 
-// Route to add a comment to a post
+// ---------------------- Comment Routes ----------------------
+
+// Add a comment to a post
 router.post('/add-comment/:id', petyayaController.addComment);
 
-// Route to edit a comment
+// Edit a comment
 router.post('/edit-comment/:id', async (req, res) => {
     await Post.updateOne(
       { "comments._id": req.params.id },
       { $set: { "comments.$.text": req.body.content } }
     );
     res.redirect('/feed');
-  });
+});
 
-// Route to delete a comment
+// Delete a comment
 router.delete("/delete-comment/:commentId", async (req, res) => {
     try {
         const { commentId } = req.params;
-
-        // Find the post that contains the comment
         const post = await Post.findOne({ "comments._id": commentId });
 
-        if (!post) {
-            return res.status(404).send("Comment not found");
-        }
+        if (!post) return res.status(404).send("Comment not found");
 
-        // Remove the comment along with its replies
         post.comments = post.comments.filter(comment => comment._id.toString() !== commentId);
-
         await post.save();
         res.redirect("/feed");
     } catch (error) {
@@ -59,16 +57,18 @@ router.delete("/delete-comment/:commentId", async (req, res) => {
     }
 });
 
-// Route to like a comment
+// Like a comment
 router.post('/like-comment/:commentId', petyayaController.likeComment);
 
-// Route to add a reply to a comment
+// ---------------------- Reply Routes ----------------------
+
+// Add a reply to a comment
 router.post("/reply-to-comment/:commentId", petyayaController.addReplyToComment);
 
-// Route to like a reply
+// Like a reply
 router.post('/like-reply/:id', petyayaController.likeReply);
 
-// Route to edit a reply
+// Edit a reply
 router.post('/edit-reply/:id', async (req, res) => {
     await Post.updateOne(
       { "comments.replies._id": req.params.id },
@@ -76,21 +76,16 @@ router.post('/edit-reply/:id', async (req, res) => {
       { arrayFilters: [{ "reply._id": req.params.id }] }
     );
     res.redirect('/feed');
-  });
+});
 
-// Route to delete a reply
+// Delete a reply
 router.delete("/delete-reply/:commentId/:replyId", async (req, res) => {
     try {
         const { commentId, replyId } = req.params;
-
-        // Find the post that contains the comment
         const post = await Post.findOne({ "comments._id": commentId });
 
-        if (!post) {
-            return res.status(404).send("Comment not found");
-        }
+        if (!post) return res.status(404).send("Comment not found");
 
-        // Find the comment and remove the specific reply
         const comment = post.comments.find(comment => comment._id.toString() === commentId);
         if (comment) {
             comment.replies = comment.replies.filter(reply => reply._id.toString() !== replyId);
@@ -104,8 +99,7 @@ router.delete("/delete-reply/:commentId/:replyId", async (req, res) => {
     }
 });
 
-// Route to add reply to a reply
+// Reply to a reply
 router.post('/reply-to-reply/:postId/:commentId/:replyId', petyayaController.addReplyToReply);
 
-// Export the router
 module.exports = router;

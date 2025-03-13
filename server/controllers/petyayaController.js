@@ -3,35 +3,27 @@ const mongoose = require('mongoose');
 const Posts = require('../../models/posts');
 const axios = require('axios');
 
-// Load environment variables
 const mongoURI = process.env.MONGODB_URI;
 const gMapAPIKey = process.env.GOOGLE_MAP_API_KEY;
 
-// Connect to MongoDB database
 mongoose.connect(mongoURI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
-    serverSelectionTimeoutMS: 5000 // Timeout for server selection
+    serverSelectionTimeoutMS: 5000
 });
 
 const db = mongoose.connection;
+db.on('error', console.error.bind(console, 'Connection error:'));
+db.once('open', () => console.log("Database connected"));
 
-// Handle database connection errors
-db.on('error', console.error.bind(console, 'connection error:'));
-// Log successful database connection
-db.once('open', () => {
-    console.log("Database connected");
-});
-
-// Render the homepage with cat images
+// Render homepage with cat images
 exports.index = async (req, res) => {
     try {
         const response = await axios.get('https://api.thecatapi.com/v1/images/search?limit=5');
-        const catImages = response.data; // Fetch random cat images
-        res.render('index', { catImages }); // Pass images to the view
+        res.render('index', { catImages: response.data });
     } catch (error) {
         console.error("Error fetching cat images:", error);
-        res.render('index', { catImages: [] }); // Render with empty images if error occurs
+        res.render('index', { catImages: [] });
     }
 };
 
@@ -39,168 +31,102 @@ exports.index = async (req, res) => {
 exports.posts = async (req, res) => {
     try {
         const response = await axios.get('https://api.thecatapi.com/v1/images/search?limit=5');
-        const catImages = response.data; // Fetch cat images
-        const posts = await Posts.find({}).sort({ createdAt: -1 }); // Fetch posts, sorted by newest first
-        res.render('home', { posts, catImages, googleMapsApiKey: gMapAPIKey });
+        const posts = await Posts.find({}).sort({ createdAt: -1 });
+        res.render('home', { posts, catImages: response.data, googleMapsApiKey: gMapAPIKey });
     } catch (error) {
-        console.error("Error fetching cat images:", error);
+        console.error("Error fetching posts:", error);
         res.render('home', { posts: [], catImages: [] });
     }
 };
 
-// Add a new post to the database
+// CRUD Operations for Posts
 exports.addPost = async (req, res) => {
-    const post = new Posts(req.body.post); // Create a new post instance
-    await post.save(); // Save the post to the database
-    res.redirect('/feed'); // Redirect back to the feed
+    await new Posts(req.body.post).save();
+    res.redirect('/feed');
 };
 
-// Edit an existing post
 exports.editPost = async (req, res) => {
     await Posts.findByIdAndUpdate(req.params.id, { content: req.body.post.content }, { new: true });
     res.redirect('/feed');
 };
 
-// Delete a post
 exports.deletePost = async (req, res) => {
     await Posts.findByIdAndDelete(req.params.id);
     res.redirect('/feed');
 };
 
-// Like a post, incrementing the like counter
 exports.likePost = async (req, res) => {
     const post = await Posts.findById(req.params.id);
     if (post) {
-        post.likes += 1; // Increment like count
+        post.likes += 1;
         await post.save();
-        res.json({ likes: post.likes }); // Send updated like count as JSON response
+        res.json({ likes: post.likes });
     } else {
-        res.status(404).json({ error: 'Post not found' }); // Handle post not found
+        res.status(404).json({ error: 'Post not found' });
     }
 };
 
-// Add a comment to a post
+// CRUD Operations for Comments
 exports.addComment = async (req, res) => {
-    try {
-        const post = await Posts.findById(req.params.id);
-        if (!post) {
-            return res.status(404).send("Post not found");
-        }
-
-        // Create a new comment object
-        const newComment = {
-            text: req.body.comment,
-            likes: 0, 
-            replies: []
-        };
-
-        post.comments.push(newComment); // Add comment to post
-        await post.save(); // Save updated post with new comment
-
-        res.redirect('/feed'); // Redirect back to the feed
-    } catch (error) {
-        console.error('Error adding comment:', error);
-        res.status(500).send("Server Error");
+    const post = await Posts.findById(req.params.id);
+    if (post) {
+        post.comments.push({ text: req.body.comment, likes: 0, replies: [] });
+        await post.save();
+        res.redirect('/feed');
+    } else {
+        res.status(404).send("Post not found");
     }
 };
 
-// Edit a comment
 exports.editComment = async (req, res) => {
-    try {
-        const post = await Posts.findOne({ 'comments._id': req.params.commentId });
-        if (post) {
-            const comment = post.comments.id(req.params.commentId);
-            comment.text = req.body.comment;
-            await post.save();
-            res.redirect('/feed');
-        } else {
-            res.status(404).json({ error: 'Comment not found' });
-        }
-    } catch (error) {
-        console.error('Error editing comment:', error);
+    const post = await Posts.findOne({ 'comments._id': req.params.commentId });
+    if (post) {
+        post.comments.id(req.params.commentId).text = req.body.comment;
+        await post.save();
         res.redirect('/feed');
+    } else {
+        res.status(404).json({ error: 'Comment not found' });
     }
 };
 
-// Delete a comment
 exports.deleteComment = async (req, res) => {
-    try {
-        const post = await Posts.findOne({ 'comments._id': req.params.commentId });
-        if (post) {
-            post.comments.id(req.params.commentId).remove();
-            await post.save();
-            res.redirect('/feed');
-        } else {
-            res.status(404).json({ error: 'Comment not found' });
-        }
-    } catch (error) {
-        console.error('Error deleting comment:', error);
+    const post = await Posts.findOne({ 'comments._id': req.params.commentId });
+    if (post) {
+        post.comments.id(req.params.commentId).remove();
+        await post.save();
         res.redirect('/feed');
+    } else {
+        res.status(404).json({ error: 'Comment not found' });
     }
 };
 
-// Like a comment
 exports.likeComment = async (req, res) => {
-    try {
-        const post = await Posts.findOne({ 'comments._id': req.params.commentId });
-        if (post) {
-            const comment = post.comments.id(req.params.commentId);
-            comment.likes += 1;
-            await post.save();
-            res.json({ likes: comment.likes });
-        } else {
-            res.status(404).json({ error: 'Comment not found' });
-        }
-    } catch (error) {
-        console.error('Error liking comment:', error);
-        res.status(500).json({ error: 'Internal server error' });
+    const post = await Posts.findOne({ 'comments._id': req.params.commentId });
+    if (post) {
+        post.comments.id(req.params.commentId).likes += 1;
+        await post.save();
+        res.json({ likes: post.comments.id(req.params.commentId).likes });
+    } else {
+        res.status(404).json({ error: 'Comment not found' });
     }
 };
 
-// Add a reply to a comment
+// CRUD Operations for Replies
 exports.addReplyToComment = async (req, res) => {
-    const { commentId } = req.params;
-    const { text } = req.body;
-
-    console.log("Received request to reply to comment:", commentId);
-    console.log("Reply text:", text);
-
-    if (!text) {
-        console.log("Error: Reply text is empty.");
-        return res.status(400).send("Reply text cannot be empty!");
+    const post = await Posts.findOne({ 'comments._id': req.params.commentId });
+    if (post) {
+        post.comments.id(req.params.commentId).replies.push({ text: req.body.text, likes: 0 });
+        await post.save();
+        res.redirect('/feed');
+    } else {
+        res.status(404).send("Comment not found");
     }
-
-    // Find the post that contains the comment
-    const post = await Posts.findOne({ "comments._id": commentId });
-
-    if (!post) {
-        console.log("Error: Comment not found inside any post.");
-        return res.status(404).send("Comment not found!");
-    }
-
-    // Find the comment
-    const comment = post.comments.id(commentId);
-    if (!comment) {
-        console.log("Error: Comment ID not found.");
-        return res.status(404).send("Comment not found!");
-    }
-
-    // Add reply
-    comment.replies.push({ text, likes: 0 });
-
-    // Save post
-    await post.save();
-    console.log("Reply added successfully!");
-
-    res.redirect('/feed');
 };
 
-// Like a reply
 exports.likeReply = async (req, res) => {
     const post = await Posts.findOne({ 'comments.replies._id': req.params.id });
     if (post) {
-        const comment = post.comments.find(c => c.replies.id(req.params.id));
-        const reply = comment.replies.id(req.params.id);
+        const reply = post.comments.find(c => c.replies.id(req.params.id)).replies.id(req.params.id);
         reply.likes += 1;
         await post.save();
         res.json({ likes: reply.likes });
@@ -209,46 +135,33 @@ exports.likeReply = async (req, res) => {
     }
 };
 
-// Edit a reply
 exports.editReply = async (req, res) => {
     await Posts.updateOne({ 'comments.replies._id': req.params.id }, { $set: { 'comments.$.replies.$[reply].text': req.body.reply } }, { arrayFilters: [{ 'reply._id': req.params.id }] });
     res.redirect('/feed');
 };
 
-// Delete a reply
 exports.deleteReply = async (req, res) => {
     await Posts.updateOne({}, { $pull: { 'comments.$[].replies': { _id: req.params.id } } });
     res.redirect('/feed');
 };
 
 exports.addReplyToReply = async (req, res) => {
-    try {
-        const { text } = req.body;
-        if (!text.trim()) {
-            return res.status(400).json({ success: false, message: "Reply text cannot be empty!" });
-        }
-
-        const post = await Posts.findById(req.params.postId);
-        if (!post) {
-            return res.status(404).json({ success: false, message: "Post not found" });
-        }
-
+    const post = await Posts.findById(req.params.postId);
+    if (post) {
         const comment = post.comments.id(req.params.commentId);
-        if (!comment) {
-            return res.status(404).json({ success: false, message: "Comment not found" });
+        if (comment) {
+            const reply = comment.replies.id(req.params.replyId);
+            if (reply) {
+                comment.replies.push({ text: req.body.text });
+                await post.save();
+                res.json({ success: true, message: "Reply added successfully" });
+            } else {
+                res.status(404).json({ success: false, message: "Reply not found" });
+            }
+        } else {
+            res.status(404).json({ success: false, message: "Comment not found" });
         }
-
-        const reply = comment.replies.id(req.params.replyId);
-        if (!reply) {
-            return res.status(404).json({ success: false, message: "Reply not found" });
-        }
-
-        comment.replies.push({ text });
-        await post.save();
-
-        res.json({ success: true, message: "Reply added successfully" });
-    } catch (error) {
-        console.error("Error adding reply to reply:", error);
-        res.status(500).json({ success: false, message: "Internal server error" });
+    } else {
+        res.status(404).json({ success: false, message: "Post not found" });
     }
 };
