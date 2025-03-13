@@ -75,11 +75,17 @@
     <div class="post-container mb-4 p-3 border rounded bg-white">
       <div class="d-flex align-items-center">
         <!-- Avatar -->
-        <img src="https://avataaars.io/?avatarStyle=Circle&topType=ShortHairShaggyMullet&accessoriesType=Sunglasses&hairColor=SilverGray"
+        <div class="d-flex">
+        <img src="https://avataaars.io/?avatarStyle=Circle&topType=ShortHairShaggyMullet&accessoriesType=Sunglasses&hairColor=SilverGray&facialHairType=MoustacheMagnum&facialHairColor=BrownDark&clotheType=ShirtCrewNeck&clotheColor=Gray01&eyeType=Surprised&eyebrowType=UnibrowNatural&mouthType=Vomit&skinColor=Pale"
           class="rounded-circle me-2" width="40" height="40" alt="User Avatar">
-        <div>
-          <strong><%= post.content %></strong>
-          <small class="d-block opacity-50"><%= new Date(post.createdAt).toISOString().slice(0, 19).replace("T", " ") %></small>
+        </div>
+        <div class="flex-grow-1">
+          <div class="d-flex flex-column justify-content-between">
+            <div class="d-flex flex-column align-items-start">
+            <strong><%= post.content %></strong>
+            <small class="opacity-50 no-wrap" data-timeago="<%= post.createdAt %>"></small>
+            </div>
+        </div>
         </div>
       </div>
 
@@ -189,12 +195,13 @@
 </div>
 <% }); %>
 
+<!-- Comment Modal -->
 <div class="modal fade" id="replyModal" tabindex="-1" aria-labelledby="replyModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
-      <div class="modal-header">
+      <div class="modal-header d-flex justify-content-center position-relative">
         <h5 class="modal-title text-center w-100" id="replyModalLabel">Reply</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="btn-close position-absolute top-0 end-0 m-2" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <form id="replyForm" method="POST">
         <div class="modal-body">
@@ -237,6 +244,11 @@
     document.getElementById('replyForm').action = `/reply-to-${type}/${parentId}`;
     new bootstrap.Modal(document.getElementById('replyModal')).show();
   }
+
+  //Convert timestamps to "time ago" format
+  document.querySelectorAll('[data-timeago]').forEach(el => {
+      el.innerText = timeago.format(el.getAttribute('data-timeago'));
+    });
   </script>  
 
 <!-- Home -->
