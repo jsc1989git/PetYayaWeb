@@ -139,10 +139,11 @@
             <div class="mt-2 d-flex justify-content-end gap-2">
               <button class="btn btn-sm btn-brand" onclick="likeReply('<%= reply._id %>')">Like (<span id="like-reply-<%= reply._id %>"><%= reply.likes %></span>)</button>
               <% comment.replies.forEach(reply => { %>
-                <button onclick="openReplyModal('<%= reply._id %>', 'reply')" class="btn btn-sm btn-brand">
-                    Reply
-                </button>
+                
             <% }) %>
+              <button onclick="openReplyModal('<%= reply._id %>', 'reply')" class="btn btn-sm btn-brand">
+                Reply
+              </button>
               <a href="#" class="btn btn-sm btn-brand" onclick="openEditModal('<%= reply._id %>', '<%= reply.text %>', 'reply')">Edit</a>
               <form class="d-inline" action="/delete-reply/<%= comment._id %>/<%= reply._id %>?_method=DELETE" method="POST" onsubmit="return confirm('Delete this reply?')">
                 <button type="submit" class="btn btn-sm btn-danger">Delete</button>
@@ -179,8 +180,6 @@
   </div>
   
   <% posts.forEach(post => { %> 
-    <div class="post-container">
-      <h5><%= post.content %></h5>
 
   <!-- Comment Modal -->
   <div class="modal fade" id="commentModal-<%= post._id %>" tabindex="-1" aria-labelledby="commentModalLabel-<%= post._id %>" aria-hidden="true">
