@@ -63,7 +63,7 @@ router.delete("/delete-comment/:commentId", async (req, res) => {
 router.post('/like-comment/:commentId', petyayaController.likeComment);
 
 // Route to add a reply to a comment
-router.post('/add-reply/:commentId', petyayaController.addReply);
+router.post("/reply-to-comment/:postId/:commentId", petyayaController.addReplyToComment);
 
 // Route to like a reply
 router.post('/like-reply/:id', petyayaController.likeReply);
@@ -103,6 +103,8 @@ router.delete("/delete-reply/:commentId/:replyId", async (req, res) => {
         res.status(500).send("Server Error");
     }
 });
+
+// Route to add reply to
 
 // Export the router
 module.exports = router;

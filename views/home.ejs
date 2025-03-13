@@ -86,7 +86,7 @@
         <!-- Post Actions -->
         <div class="mt-2 d-flex justify-content-end gap-2">
           <button class="btn btn-sm btn-brand" onclick="likePost('<%= post._id %>')">Like (<span id="like-count-<%= post._id %>"><%= post.likes %></span>)</button>
-          <button class="btn btn-sm btn-brand" data-bs-toggle="modal" data-bs-target="#CommentForm-<%= post._id %>">Comment</button>
+          <button class="btn btn-sm btn-brand" data-bs-toggle="modal" data-bs-target="#commentModal-<%= post._id %>">Comment</button>
           <a href="#" class="btn btn-sm btn-brand" onclick="openEditModal('<%= post._id %>', '<%= post.content %>', 'post')">Edit</a>
           <form class="d-inline" action="/delete-post/<%= post._id %>?_method=DELETE" method="POST" onsubmit="return confirm('Delete this post?')">
             <button type="submit" class="btn btn-sm btn-danger">Delete</button>
@@ -111,7 +111,7 @@
           <!-- Comment Actions -->
           <div class="mt-2 d-flex justify-content-end gap-2">
             <button class="btn btn-sm btn-brand" onclick="likeComment('<%= comment._id %>')">Like (<span id="like-count-<%= comment._id %>"><%= comment.likes %></span>)</button>
-            <button class="btn btn-sm btn-brand" data-bs-toggle="modal" data-bs-target="#ReplyForm-<%= comment._id %>">Reply</button>
+            <button class="btn btn-sm btn-brand" onclick="openReplyModal('<%= comment._id %>', 'comment')">Reply</button>
             <a href="#" class="btn btn-sm btn-brand" onclick="openEditModal('<%= comment._id %>', '<%= comment.text %>', 'comment')">Edit</a>
             <form class="d-inline" action="/delete-comment/<%= comment._id %>?_method=DELETE" method="POST" onsubmit="return confirm('Delete this comment?')">
               <button type="submit" class="btn btn-sm btn-danger">Delete</button>
@@ -136,7 +136,7 @@
             <!-- Reply Actions -->
             <div class="mt-2 d-flex justify-content-end gap-2">
               <button class="btn btn-sm btn-brand" onclick="likeReply('<%= reply._id %>')">Like (<span id="like-reply-<%= reply._id %>"><%= reply.likes %></span>)</button>
-              <button class="btn btn-sm btn-brand" data-bs-toggle="modal" data-bs-target="#ReplyForm-<%= reply._id %>">Reply</button>
+              <button class="btn btn-sm btn-brand" onclick="openReplyModal('<%= reply._id %>', 'reply')">Reply</button>
               <a href="#" class="btn btn-sm btn-brand" onclick="openEditModal('<%= reply._id %>', '<%= reply.text %>', 'reply')">Edit</a>
               <form class="d-inline" action="/delete-reply/<%= comment._id %>/<%= reply._id %>?_method=DELETE" method="POST" onsubmit="return confirm('Delete this reply?')">
                 <button type="submit" class="btn btn-sm btn-danger">Delete</button>
@@ -171,6 +171,54 @@
       </div>
     </div>
   </div>
+  
+  <% posts.forEach(post => { %> 
+    <div class="post-container">
+      <h5><%= post.content %></h5>
+
+  <!-- Comment Modal -->
+  <div class="modal fade" id="commentModal-<%= post._id %>" tabindex="-1" aria-labelledby="commentModalLabel-<%= post._id %>" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="commentModalLabel-<%= post._id %>">Add a Comment</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form action="/add-comment/<%= post._id %>" method="POST">
+          <div class="modal-body">
+            <textarea name="comment" class="form-control" placeholder="Write a comment..." required></textarea>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-brand">Post Comment</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+<% }); %>
+
+  <!-- Reply Modal -->
+<div class="modal fade" id="replyModal" tabindex="-1" aria-labelledby="replyModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title text-center w-100" id="replyModalLabel">Reply</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form id="replyForm" method="POST">
+        <div class="modal-body">
+          <textarea id="replyContent" name="content" class="form-control" placeholder="Write your reply..."></textarea>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-brand">Post Reply</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
   
   <script>
     function likePost(postId) {
@@ -212,6 +260,22 @@
 
     // Show the modal
     let modal = new bootstrap.Modal(document.getElementById('editModal'));
+    modal.show();
+  }
+
+    function openReplyModal(parentId, type) {
+    document.getElementById('replyContent').value = ''; // Clear previous content
+    let form = document.getElementById('replyForm');
+
+    // Set the correct reply route based on type
+    if (type === 'comment') {
+      form.action = `/reply-to-comment/${parentId}`;
+    } else if (type === 'reply') {
+      form.action = `/reply-to-reply/${parentId}`;
+    }
+
+    // Show the modal
+    let modal = new bootstrap.Modal(document.getElementById('replyModal'));
     modal.show();
   }
 

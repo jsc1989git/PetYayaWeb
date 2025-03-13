@@ -83,12 +83,24 @@ exports.likePost = async (req, res) => {
 exports.addComment = async (req, res) => {
     try {
         const post = await Posts.findById(req.params.id);
-        post.comments.push({ text: req.body.comment, likes: 0, replies: [] }); // Add new comment to post
-        await post.save(); // Save updated post
-        res.redirect('/feed');
+        if (!post) {
+            return res.status(404).send("Post not found");
+        }
+
+        // Create a new comment object
+        const newComment = {
+            text: req.body.comment,
+            likes: 0, 
+            replies: []
+        };
+
+        post.comments.push(newComment); // Add comment to post
+        await post.save(); // Save updated post with new comment
+
+        res.redirect('/feed'); // Redirect back to the feed
     } catch (error) {
         console.error('Error adding comment:', error);
-        res.redirect('/feed');
+        res.status(500).send("Server Error");
     }
 };
 
@@ -146,20 +158,34 @@ exports.likeComment = async (req, res) => {
 };
 
 // Add a reply to a comment
-exports.addReply = async (req, res) => {
+exports.addReplyToComment = async (req, res) => {
     try {
-        const post = await Posts.findOne({ 'comments._id': req.params.commentId });
-        if (post) {
-            const comment = post.comments.id(req.params.commentId);
-            comment.replies.push({ text: req.body.reply, likes: 0 });
-            await post.save();
-            res.redirect('/feed');
-        } else {
-            res.status(404).json({ error: 'Comment not found' });
+        const { text } = req.body; // Extract text properly
+        if (!text || text.trim() === "") {
+            return res.status(400).json({ success: false, message: "Reply text cannot be empty" });
         }
+
+        const postId = req.params.postId;
+        const commentId = req.params.commentId;
+
+        const post = await Post.findById(postId);
+        if (!post) {
+            return res.status(404).json({ success: false, message: "Post not found" });
+        }
+
+        const comment = post.comments.id(commentId);
+        if (!comment) {
+            return res.status(404).json({ success: false, message: "Comment not found" });
+        }
+
+        // Push new reply
+        comment.replies.push({ text });
+
+        await post.save();
+        res.json({ success: true, message: "Reply added successfully" });
     } catch (error) {
-        console.error('Error adding reply:', error);
-        res.redirect('/feed');
+        console.error("Error adding reply:", error);
+        res.status(500).json({ success: false, message: "Internal server error" });
     }
 };
 
@@ -187,4 +213,41 @@ exports.editReply = async (req, res) => {
 exports.deleteReply = async (req, res) => {
     await Posts.updateOne({}, { $pull: { 'comments.$[].replies': { _id: req.params.id } } });
     res.redirect('/feed');
+};
+
+exports.addReplyToReply = async (req, res) => {
+    try {
+        const { text } = req.body;
+        if (!text || text.trim() === "") {
+            return res.status(400).json({ success: false, message: "Reply text cannot be empty" });
+        }
+
+        const postId = req.params.postId;
+        const commentId = req.params.commentId;
+        const replyId = req.params.replyId;
+
+        const post = await Post.findById(postId);
+        if (!post) {
+            return res.status(404).json({ success: false, message: "Post not found" });
+        }
+
+        const comment = post.comments.id(commentId);
+        if (!comment) {
+            return res.status(404).json({ success: false, message: "Comment not found" });
+        }
+
+        const reply = comment.replies.id(replyId);
+        if (!reply) {
+            return res.status(404).json({ success: false, message: "Reply not found" });
+        }
+
+        // Push new reply inside the reply
+        comment.replies.push({ text });
+
+        await post.save();
+        res.json({ success: true, message: "Reply added successfully" });
+    } catch (error) {
+        console.error("Error adding reply to reply:", error);
+        res.status(500).json({ success: false, message: "Internal server error" });
+    }
 };
