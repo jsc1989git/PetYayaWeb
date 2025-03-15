@@ -525,6 +525,14 @@
                         <input type="password" class="form-control" id="exampleInputPassword1">
                     </div>
                     <button type="submit" class="btn btn-light mt-3" style="border-radius: 10px;" > <a href="home.ejs">LOGIN</a></button>
+                    <% if (!user) { %>
+                      <a href="/auth/google" class="btn btn-danger btn btn-light mt-3" style="border-radius: 10px;">
+                        <i class="ri-google-fill"></i> Login with Google
+                      </a>
+                    <% } else { %>
+                      <p>Welcome, <%= user.name %>!</p>
+                      <a href="/auth/logout" class="btn btn-secondary">Logout</a>
+                    <% } %>
                     <p>Not a member? <a  id="btn" data-bs-toggle="modal" data-bs-target="#ModalSignUpForm" href="#">Sign Up</a></p>
                 </form>
             </div>
