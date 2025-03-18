@@ -361,7 +361,10 @@ img {
 .modal-content {
   width: 80%;
   margin: 0 auto;
+  background-color: #ff758f !important;
+  border-radius: 15px;
 }
+
 .modal-body {
   padding: 32px;
 }
@@ -573,4 +576,31 @@ footer .line {
   background-color: yellow;
   font-weight: bold;
   color: black;
+}
+
+.custom-signup-btn {
+  background-color: white;
+  color: hsl(353, 100%, 74%);
+  border-radius: 10px;
+  width: 60%;
+  transition: all 0.3s ease-in-out;
+}
+
+.custom-signup-btn:hover {
+  background-color: hsl(353, 100%, 74%);
+  color: white;
+}
+
+.custom-login-btn {
+  background-color: white;
+  color: hsl(353, 100%, 74%);
+  border-radius: 10px;
+  width: 100%;
+  transition: all 0.3s ease-in-out;
+  border: 2px solid hsl(353, 100%, 74%);
+}
+
+.custom-login-btn:hover {
+  background-color: hsl(353, 100%, 74%);
+  color: white;
 }

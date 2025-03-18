@@ -491,65 +491,99 @@
 
 
 <!-- Log In Modal -->
-  <div class="modal fade" id="ModalForm" tabindex="1" aria-labelledby="ModalFormLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-body">
-            <button type="reset"  form=”login” class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            <div class="myform">
-                <h1 class="text-center">Login Form</h1>
-
-                <form id=”login” method=”post” action=”something.php”>
-                    <div class="mb-3 mt-4">
-                        <label for="exampleInputEmail1" class="form-label">Email address</label>
-                        <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp">
-                    </div>
-                    <div class="mb-3">
-                        <label for="exampleInputPassword1" class="form-label">Password</label>
-                        <input type="password" class="form-control" id="exampleInputPassword1">
-                    </div>
-                    <button type="submit" class="btn btn-light mt-3" style="border-radius: 10px;" > <a href="home.ejs">LOGIN</a></button>
-                    <p>Not a member? <a  id="btn" data-bs-toggle="modal" data-bs-target="#ModalSignUpForm" href="#">Sign Up</a></p>
-                </form>
+<div class="modal fade" id="ModalForm" tabindex="1" aria-labelledby="ModalFormLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg"> 
+    <div class="modal-content border-0" style="background-color: var(--theme-color); border-radius: 15px;">
+      <div class="modal-body p-0 d-flex">
+        <!-- Form Column -->
+        <div class="col-md-6 p-4">
+          <button type="reset" form="login" class="btn-close btn-close-white position-absolute top-0 end-0 m-3" data-bs-dismiss="modal" aria-label="Close"></button>
+          <h1 class="text-white mb-4">Login Form</h1>
+          <form id="login" method="post" action="something.php">
+            <div class="mb-3">
+              <label for="exampleInputEmail1" class="form-label text-white">Enter Your Email Address</label>
+              <input type="email" class="form-control" id="exampleInputEmail1" required style="border: 2px solid white; border-radius: 10px; background: transparent; color: white;">
             </div>
+            <div class="mb-3">
+              <label for="exampleInputPassword1" class="form-label text-white">Enter Your Password</label>
+              <input type="password" class="form-control" id="exampleInputPassword1" required style="border: 2px solid white; border-radius: 10px; background: transparent; color: white;">
+            </div>
+            <div class="d-grid">
+              <button type="submit" class="btn custom-login-btn fw-bold">LOGIN</button>
+            </div>            
+            <p class="text-center mt-3 text-white">
+              Not a member? <a id="btn" data-bs-toggle="modal" data-bs-target="#ModalSignUpForm" href="#" class="fw-bold text-white">Sign Up</a>
+            </p>
+          </form>
         </div>
       </div>
     </div>
   </div>
+</div>
+
+        <!--Image Column-->
+        <div class="col-md-6 d-none d-md-block">
+          <img src="/assets/images/cat.jpg" 
+                alt="Log In Illustration" 
+                class="img-fluid w-100 h-100" 
+                style="object-fit: cover; object-position: 90% center; border-radius: 0 15px 15px 0;">
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 
 
 <!-- Sign Up Modal -->
 <div class="modal fade" id="ModalSignUpForm" tabindex="-1" aria-labelledby="ModalFormLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-body">
-        <button type="reset" form="signup" class="btn-close btn-close-black" data-bs-dismiss="modal" aria-label="Close"></button>
-        <div class="row">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content border-0" style="background-color: #ff758f; border-radius: 15px;">
+      <div class="modal-body position-relative p-0">
+        <button type="reset" form="signup" class="btn-close position-absolute top-0 end-0 m-3" data-bs-dismiss="modal" aria-label="Close"></button>
+        
+        <div class="row g-0">
           <!-- Form Column -->
-          <div class="col-md-12 myform">
-            <h1 class="text-center">Sign Up Form</h1>
+          <div class="col-md-6 p-4">
+            <h1 class="text-white mb-4" style="font-size: 2rem; white-space: nowrap;">Create Account</h1>
             <form id="signup" method="post" action="something.php">
-              <div class="mb-3 mt-4">
-                <label for="SignupInputEmail" class="form-label">Enter Your Email address</label>
-                <input type="email" class="form-control" id="SignupInputEmail" aria-describedby="emailHelp">
+              <div class="mb-3">
+                <label for="SignupInputEmail" class="form-label text-white">Enter Your Email Address</label>
+                <input type="email" class="form-control border" id="SignupInputEmail" required style="border-radius: 10px;">
+              </div>
+
+              <div class="mb-3">
+                <label for="password" class="form-label text-white">Enter Your Password</label>
+                <input type="password" class="form-control border" id="password" required style="border-radius: 10px;">
               </div>
               <div class="mb-3">
-                <label for="exampleInputPassword1" class="form-label">Enter Your Password</label>
-                <input type="password" class="form-control" id="password">
+                <label for="confirmpassword" class="form-label text-white">Confirm Password</label>
+                <input type="password" class="form-control border" id="confirmpassword" required style="border-radius: 10px;">
               </div>
-              <div class="mb-3">
-                <label for="exampleInputPassword2" class="form-label">Confirm Password</label>
-                <input type="password" class="form-control" id="confirmpassword">
-              </div>
+
               <div class="form-check mb-4">
-                <input class="form-check-input" type="checkbox" required id="SignUpCheckBox" />
-                <label class="form-check-label">
-                  I agree to the <a id="alink" href="#!" style="color: black;" data-bs-toggle="modal" data-bs-target="#termsandcondition">Terms of service</a>
+                <input class="form-check-input" type="checkbox" required id="SignUpCheckBox">
+                <label class="form-check-label text-white">
+                  I agree to the <a id="alink" href="#!" class="text-white fw-bold" data-bs-toggle="modal" data-bs-target="#termsandcondition">Terms of Service</a>
                 </label>
               </div>
-              <button type="button" class="btn btn-light mt-3" style="border-radius: 10px;" id="SignUpBtn" >Sign Up</button>
-              <p>Already have an account? <a id="btn" data-bs-toggle="modal" data-bs-target="#ModalForm" href="#" style="color: white;">Log In</a></p>
+
+              <div class="text-center">
+                <button type="submit" class="btn custom-signup-btn fw-bold px-4 w-100">Sign Up</button>
+              </div>              
+
+              <p class="text-center mt-3 text-white">
+                Already have an account? <a id="btn" data-bs-toggle="modal" data-bs-target="#ModalForm" href="#" class="fw-bold text-white">Log In</a>
+              </p>
             </form>
+          </div>
+
+            <!-- Image Column -->
+          <div class="col-md-6 d-flex align-items-center">
+            <img src="/assets/images/image.jpg" 
+                alt="Sign Up Illustration" 
+                class="img-fluid w-100 h-100" 
+                style="object-fit: cover; object-position: 90% center; border-radius: 0 15px 15px 0;">
           </div>
         </div>
       </div>
