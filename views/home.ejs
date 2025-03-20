@@ -109,8 +109,9 @@
       <div class="mt-2 d-flex justify-content-end gap-2">
         <button class="btn btn-sm btn-brand" onclick="likePost('<%= post._id %>')">Like (<span id="like-like-post-<%= post._id %>"><%= post.likes %></span>)</button>        
         <button class="btn btn-sm btn-brand" data-bs-toggle="modal" data-bs-target="#commentModal-<%= post._id %>">Comment</button>
-        <a href="#" class="btn btn-sm btn-brand" onclick="openEditModal('<%= post._id %>', '<%= post.content %>', 'post')">Edit</a>
+        
         <% if (post.author && user && post.author.toString() === user._id.toString()) { %>
+          <a href="#" class="btn btn-sm btn-brand" onclick="openEditModal('<%= post._id %>', '<%= post.content %>', 'post')">Edit</a>
           <form class="d-inline" action="/delete-post/<%= post._id %>?_method=DELETE" method="POST" onsubmit="return confirm('Delete this post?')">
             <button type="submit" class="btn btn-sm btn-danger">Delete</button>
           </form>
