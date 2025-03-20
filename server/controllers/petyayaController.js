@@ -130,7 +130,7 @@ exports.likePost = async (req, res) => {
 exports.addComment = async (req, res) => {
     const post = await Posts.findById(req.params.id);
     if (post) {
-        post.comments.push({ text: req.body.comment, likes: 0, replies: [] });
+        post.comments.push({ text: req.body.comment, likes: [], replies: [] });
         await post.save();
         res.redirect('/feed');
     } else {

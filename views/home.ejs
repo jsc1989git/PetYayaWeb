@@ -135,10 +135,12 @@
         <div class="mt-2 d-flex justify-content-end gap-2">
           <button class="btn btn-sm btn-brand" onclick="likeComment('<%= comment._id %>')">Like (<span id="like-like-comment-<%= comment._id %>"><%= comment.likes %></span>)</button>          
           <button onclick="openReplyModal('<%= comment._id %>', 'comment')" class="btn btn-sm btn-brand">Reply</button>
-          <a href="#" class="btn btn-sm btn-brand" onclick="openEditModal('<%= comment._id %>', '<%= comment.text %>', 'comment')">Edit</a>
-          <form class="d-inline" action="/delete-comment/<%= comment._id %>?_method=DELETE" method="POST" onsubmit="return confirm('Delete this comment?')">
-            <button type="submit" class="btn btn-sm btn-danger">Delete</button>
-          </form>
+          <% if (comment.author && user && comment.author.toString() === user._id.toString()) { %>
+            <a href="#" class="btn btn-sm btn-brand" onclick="openEditModal('<%= comment._id %>', '<%= comment.text %>', 'comment')">Edit</a>
+            <form class="d-inline" action="/delete-comment/<%= comment._id %>?_method=DELETE" method="POST" onsubmit="return confirm('Delete this comment?')">
+              <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+            </form>
+          <% } %>
         </div>
       </div>
 
