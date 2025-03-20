@@ -4,7 +4,7 @@ const mongoose = require("mongoose");
 const ReplySchema = new mongoose.Schema(
   {
     text: { type: String, required: true },
-    likes: { type: Number, default: 0 },
+    likes: [{ type: String }],
   },
   { timestamps: true }
 );
@@ -13,7 +13,7 @@ const ReplySchema = new mongoose.Schema(
 const CommentSchema = new mongoose.Schema(
   {
     text: { type: String, required: true },
-    likes: { type: Number, default: 0 },
+    likes: [{ type: String }],
     replies: [ReplySchema], // Nested replies inside comments
   },
   { timestamps: true }
@@ -23,7 +23,7 @@ const CommentSchema = new mongoose.Schema(
 const PostSchema = new mongoose.Schema(
   {
     content: { type: String, required: true },
-    likes: { type: Number, default: 0 },
+    likes: [{ type: String }],
     comments: [CommentSchema], // Nested comments inside posts
   },
   { timestamps: true }

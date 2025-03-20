@@ -49,13 +49,31 @@ exports.deletePost = async (req, res) => {
 };
 
 exports.likePost = async (req, res) => {
-    const post = await Posts.findById(req.params.id);
-    if (post) {
-        post.likes += 1;
+    try {
+        const { userId } = req.body; // Ensure userId is sent in the request
+        const post = await Posts.findById(req.params.id);
+
+        if (!post) {
+            return res.status(404).json({ error: 'Post not found' });
+        }
+
+        const hasLiked = post.likes.includes(userId);
+
+        if (hasLiked) {
+            // Unlike: Remove userId from likes array
+            post.likes = post.likes.filter(userId => userId !== userId);
+        } else {
+            // Like: Add userId to likes array
+            post.likes.push(userId);
+        }
+
         await post.save();
-        res.json({ likes: post.likes });
-    } else {
-        res.status(404).json({ error: 'Post not found' });
+
+        res.json({ likes: post.likes.length, liked: !hasLiked });
+
+    } catch (error) {
+        console.error("Error liking/unliking post:", error);
+        res.status(500).json({ error: 'Internal server error' });
     }
 };
 
@@ -83,10 +101,12 @@ exports.editComment = async (req, res) => {
 };
 
 exports.deleteComment = async (req, res) => {
-    const post = await Posts.findOne({ 'comments._id': req.params.commentId });
+    const post = await Posts.findOneAndUpdate({ 'comments._id': req.params.commentId },
+        { $pull: { comments: { _id: req.params.commentId } } },
+        { new
+        : true }
+    );
     if (post) {
-        post.comments.id(req.params.commentId).remove();
-        await post.save();
         res.redirect('/feed');
     } else {
         res.status(404).json({ error: 'Comment not found' });
@@ -96,9 +116,16 @@ exports.deleteComment = async (req, res) => {
 exports.likeComment = async (req, res) => {
     const post = await Posts.findOne({ 'comments._id': req.params.commentId });
     if (post) {
-        post.comments.id(req.params.commentId).likes += 1;
+        const comment = post.comments.id(req.params.commentId);
+        if (!comment.likedBy.includes(req.user.id)) {
+            comment.likes += 1;
+            comment.likedBy.push(req.user.id);
+        } else {
+            comment.likes -= 1;
+            comment.likedBy = comment.likedBy.filter(userId => userId !== req.user.id);
+        }
         await post.save();
-        res.json({ likes: post.comments.id(req.params.commentId).likes });
+        res.json({ likes: comment.likes });
     } else {
         res.status(404).json({ error: 'Comment not found' });
     }
@@ -138,8 +165,13 @@ exports.likeReply = async (req, res) => {
             return res.status(404).json({ error: 'Reply not found' });
         }
 
-        // Increment like count
-        reply.likes += 1;
+        if (!reply.likedBy.includes(req.user._id)) {
+            reply.likes -= 1;
+            reply.likedBy.push(req.user.id);
+        } else {
+            reply.likes += 1;
+            reply.likedBy = reply.likedBy.filter(userId => userId !== req.user.id);
+        }
         await post.save();
 
         res.json({ likes: reply.likes });
