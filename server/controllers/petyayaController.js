@@ -3,14 +3,7 @@ const mongoose = require('mongoose');
 const Posts = require('../../models/posts');
 const axios = require('axios');
 
-const mongoURI = process.env.MONGODB_URI;
 const gMapAPIKey = process.env.GOOGLE_MAP_API_KEY;
-
-mongoose.connect(mongoURI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-    serverSelectionTimeoutMS: 5000
-});
 
 const db = mongoose.connection;
 db.on('error', console.error.bind(console, 'Connection error:'));
