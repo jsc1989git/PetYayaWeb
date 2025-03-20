@@ -358,10 +358,17 @@ img {
 }
 
 /*modal*/
-.modal-content {
+.custom-modal {
   width: 80%;
   margin: 0 auto;
   background-color: #ff758f !important;
+  border-radius: 15px;
+}
+
+.modal-content {
+  width: 80%;
+  margin: 0 auto;
+  background-color: var(--c-body-light);
   border-radius: 15px;
 }
 
