@@ -99,18 +99,8 @@
 >
  <div class="section-title mx-auto" id="timeline">
   <div class="col-12 text-center">
-    <div class="main-content mt-4">
-      <h1 class="display-6 fw-semibold mt-3" style="color: black;">Timeline</h1>
-      <div class="line"></div>
-      <div class="container mt-3">
-        <form action="/add-post" method="POST">
-          <div class="mb-2">
-            <textarea id="postContent" name="post[content]" class="form-control" rows="3" placeholder="Write something..." required></textarea>
-          </div>
-          <button type="submit" class="btn btn-brand col-12">Post</button>
-        </form>
-      </div>
-    </div>
+    <h1 class="display-6 fw-semibold" style="color: black;">Admin Dashboard</h1>
+    <div class="line"></div>
   
   <!-- Main Container -->
   <div class="container mt-3">
@@ -141,12 +131,10 @@
         <div class="mt-2 d-flex justify-content-end gap-2">
           <button class="btn btn-sm btn-brand" onclick="likePost('<%= post._id %>')">Like (<span id="like-like-post-<%= post._id %>"><%= post.likes %></span>)</button>        
           <button class="btn btn-sm btn-brand" data-bs-toggle="modal" data-bs-target="#commentModal-<%= post._id %>">Comment</button>
-          <% if (user && post.author && post.author._id.toString() === user._id.toString()) { %>
-          <a href="#" class="btn btn-sm btn-brand" data-bs-toggle="modal" data-bs-target="#EditForm-<%= post._id %>">Edit</a>
-          <form class="d-inline" action="/delete-post/<%= post._id %>?_method=DELETE" method="POST" onsubmit="return confirm('Delete this post?')">
-            <button type="submit" class="btn btn-sm btn-danger">Delete</button>
-          </form>
-          <% } %>
+            <a href="#" class="btn btn-sm btn-brand" data-bs-toggle="modal" data-bs-target="#EditForm-<%= post._id %>">Edit</a>
+            <form class="d-inline" action="/delete-post/<%= post._id %>?_method=DELETE" method="POST" onsubmit="return confirm('Delete this post?')">
+              <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+            </form>
         </div>
       </div>
   

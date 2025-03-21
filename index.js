@@ -5,7 +5,8 @@ const ejsMate = require('ejs-mate');
 const methodOverride = require('method-override')
 const mongoose = require("mongoose");
 const session = require('express-session');
-const passport = require('./auth');
+const passport = require('./passport');
+const { ensureAuthenticated, checkRole } = require('./server/middleware/auth');
 const MongoStore = require('connect-mongo');
 
 const PORT = process.env.PORT || 3000;

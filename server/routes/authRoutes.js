@@ -1,5 +1,5 @@
 const express = require('express');
-const passport = require('../../auth');
+const passport = require('../../passport');
 const router = express.Router();
 
 // Initiate Google OAuth login

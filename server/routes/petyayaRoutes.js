@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const petyayaController = require('../controllers/petyayaController')
-const { ensureAuthenticated } = require('../middleware/auth');
+const { ensureAuthenticated, checkRole } = require('../middleware/auth');
 const Post = require('../../models/posts');
 
 router.get('/', petyayaController.index)
@@ -12,6 +12,7 @@ router.post('/add-post-profile', ensureAuthenticated, petyayaController.addPostP
 router.put('/edit-post/:id', ensureAuthenticated, petyayaController.editPost);
 router.delete('/delete-post/:id', ensureAuthenticated, petyayaController.deletePost);
 router.get('/profile', ensureAuthenticated, petyayaController.profile);
+router.get('/admin', ensureAuthenticated, checkRole('admin'), petyayaController.admin);
 
 // Like a post
 router.post('/like-post/:id', ensureAuthenticated, petyayaController.likePost);

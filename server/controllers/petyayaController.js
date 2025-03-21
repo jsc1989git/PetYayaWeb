@@ -35,7 +35,7 @@ exports.posts = async (req, res) => {
                 select: "name avatar"
             })
             .sort({ createdAt: -1 });
-        res.render('home', { posts, catImages: response.data, googleMapsApiKey: gMapAPIKey });
+        res.render('home', { posts, user: req.user, catImages: response.data, googleMapsApiKey: gMapAPIKey });
     } catch (error) {
         console.error("Error fetching posts:", error);
         res.render('home', { posts: [], catImages: [] });
@@ -50,6 +50,28 @@ exports.profile = async (req, res) => {
     } catch (error) {
         console.error("Error fetching posts:", error);
         res.render('profile', { posts: [] });
+    }
+};
+
+// Fetch all posts and render the feed page
+exports.admin = async (req, res) => {
+    try {
+        const response = await axios.get('https://api.thecatapi.com/v1/images/search');
+        const posts = await Posts.find({})
+            .populate('author', 'name avatar')
+            .populate({
+                path: "comments.author", // Populate comment author
+                select: "name avatar"
+            })
+            .populate({
+                path: "comments.replies.author", // Populate reply author
+                select: "name avatar"
+            })
+            .sort({ createdAt: -1 });
+        res.render('admin', { posts, catImages: response.data, googleMapsApiKey: gMapAPIKey });
+    } catch (error) {
+        console.error("Error fetching posts:", error);
+        res.render('admin', { posts: [], catImages: [] });
     }
 };
 
