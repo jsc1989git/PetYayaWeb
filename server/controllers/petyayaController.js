@@ -23,7 +23,7 @@ exports.index = async (req, res) => {
 // Fetch all posts and render the feed page
 exports.posts = async (req, res) => {
     try {
-        const response = await axios.get('https://api.thecatapi.com/v1/images/search?limit=5');
+        const response = await axios.get('https://api.thecatapi.com/v1/images/search');
         const posts = await Posts.find({}).sort({ createdAt: -1 });
         res.render('home', { posts, catImages: response.data, googleMapsApiKey: gMapAPIKey });
     } catch (error) {

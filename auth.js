@@ -7,7 +7,7 @@ passport.use(new GoogleStrategy({
   clientID: process.env.GOOGLE_CLIENT_ID,
   clientSecret: process.env.GOOGLE_CLIENT_SECRET,
   callbackURL: 'https://petyaya.onrender.com/auth/google/callback' || 'http://localhost:3000/auth/google/callback',
-  passReqToCallback: true // Allows us to access request in the callback
+  passReqToCallback: true
 }, async (request, accessToken, refreshToken, profile, done) => {
   try {
     let user = await User.findOne({ googleId: profile.id });
