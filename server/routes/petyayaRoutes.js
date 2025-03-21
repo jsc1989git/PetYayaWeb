@@ -8,6 +8,7 @@ router.get('/', petyayaController.index)
 // Routes now protected (need to login to access)
 router.get('/feed', ensureAuthenticated, petyayaController.posts);
 router.post('/add-post', ensureAuthenticated, petyayaController.addPost);
+router.post('/add-post-profile', ensureAuthenticated, petyayaController.addPostProfile);
 router.put('/edit-post/:id', ensureAuthenticated, petyayaController.editPost);
 router.delete('/delete-post/:id', ensureAuthenticated, petyayaController.deletePost);
 router.get('/profile', ensureAuthenticated, petyayaController.profile);

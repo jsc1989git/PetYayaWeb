@@ -69,6 +69,31 @@ exports.addPost = async (req, res) => {
     }
 };
 
+exports.addPostProfile = async (req, res) => {
+    try {
+        if (!req.user || !req.user.id) {
+            return res.status(401).json({ error: "Unauthorized. Please log in." });
+        }
+
+        const { content } = req.body.post; // Get post content from request body
+
+        if (!content) {
+            return res.status(400).json({ error: "Content is required" });
+        }
+
+        const newPost = new Posts({
+            content,
+            author: req.user.id, // Set the author to the logged-in user
+        });
+
+        await newPost.save();
+        res.redirect("/profile");
+    } catch (error) {
+        console.error("Error adding post:", error);
+        res.status(500).json({ error: "Error adding post" });
+    }
+};
+
 exports.editPost = async (req, res) => {
     try {
         if (!req.user || !req.user.id) {
