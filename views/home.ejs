@@ -129,6 +129,7 @@
           <div class="flex-grow-1">
             <div class="d-flex flex-column justify-content-between">
               <div class="d-flex flex-column align-items-start">
+                <small class="opacity-50 no-wrap"><%= post.author.name  %></small>
                 <strong><%= post.content %></strong>
                 <small class="opacity-50 no-wrap" data-timeago="<%= post.createdAt %>"></small>
               </div>
@@ -157,6 +158,9 @@
             <img src="https://avataaars.io/?avatarStyle=Circle&topType=ShortHairShortFlat&accessoriesType=Blank&hairColor=BrownDark"
               class="rounded-circle me-2" width="30" height="30" alt="User Avatar">
             <div class="d-flex flex-column align-items-start">
+              <small class="opacity-50 no-wrap">
+                <%= comment.author ? comment.author.name : "Unknown User" %>
+              </small>
               <strong><%= comment.text %></strong>
               <small class="opacity-50 no-wrap" data-timeago="<%= comment.createdAt %>"></small>
             </div>

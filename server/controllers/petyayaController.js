@@ -24,7 +24,17 @@ exports.index = async (req, res) => {
 exports.posts = async (req, res) => {
     try {
         const response = await axios.get('https://api.thecatapi.com/v1/images/search');
-        const posts = await Posts.find({}).sort({ createdAt: -1 });
+        const posts = await Posts.find({})
+            .populate('author', 'name avatar')
+            .populate({
+                path: "comments.author", // Populate comment author
+                select: "name avatar"
+            })
+            .populate({
+                path: "comments.replies.author", // Populate reply author
+                select: "name avatar"
+            })
+            .sort({ createdAt: -1 });
         res.render('home', { posts, catImages: response.data, googleMapsApiKey: gMapAPIKey });
     } catch (error) {
         console.error("Error fetching posts:", error);
