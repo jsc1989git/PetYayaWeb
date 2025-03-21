@@ -10,7 +10,7 @@ router.get('/feed', ensureAuthenticated, petyayaController.posts);
 router.post('/add-post', ensureAuthenticated, petyayaController.addPost);
 router.put('/edit-post/:id', ensureAuthenticated, petyayaController.editPost);
 router.delete('/delete-post/:id', ensureAuthenticated, petyayaController.deletePost);
-
+router.get('/profile', ensureAuthenticated, petyayaController.profile);
 
 // Like a post
 router.post('/like-post/:id', petyayaController.likePost);

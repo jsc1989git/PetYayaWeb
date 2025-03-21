@@ -32,6 +32,17 @@ exports.posts = async (req, res) => {
     }
 };
 
+//Fetch owner posts and render the profile page
+exports.profile = async (req, res) => {
+    try {
+        const posts = await Posts.find({ author: req.user.id }).sort({ createdAt: -1 });
+        res.render('profile', { posts, googleMapsApiKey: gMapAPIKey });
+    } catch (error) {
+        console.error("Error fetching posts:", error);
+        res.render('profile', { posts: [] });
+    }
+};
+
 // CRUD Operations for Posts
 exports.addPost = async (req, res) => {
     try {
