@@ -59,8 +59,32 @@ exports.addPost = async (req, res) => {
 };
 
 exports.editPost = async (req, res) => {
-    await Posts.findByIdAndUpdate(req.params.id, { content: req.body.post.content }, { new: true });
-    res.redirect('/feed');
+    try {
+        if (!req.user || !req.user.id) {
+            return res.status(401).json({ error: "Unauthorized. Please log in." });
+        }
+
+        if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+            return res.status(400).json({ error: "Invalid post ID" });
+        }
+
+        const post = await Posts.findById(req.params.id);
+        if (!post) {
+            return res.status(404).json({ error: "Post not found" });
+        }
+
+        if (post.author.toString() !== req.user.id) {
+            return res.status(403).json({ error: "You can only edit your own posts" });
+        }
+
+        post.content = req.body.post.content;
+        await post.save();
+
+        res.redirect('/feed');
+    } catch (error) {
+        console.error("Error editing post:", error);
+        res.status(500).json({ error: "Internal server error" });
+    }
 };
 
 exports.deletePost = async (req, res) => {
