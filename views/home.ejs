@@ -467,7 +467,7 @@
         const replyModal = document.getElementById('replyModal');
         if (replyModal) {
           const form = replyModal.querySelector('form');
-          form.action = `/add-${type}/${parentId}`;
+          form.action = `/reply-to-comment/${parentId}`;
           new bootstrap.Modal(replyModal).show();
         } else {
           console.error('Reply modal not found');

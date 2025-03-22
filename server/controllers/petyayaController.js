@@ -325,10 +325,10 @@ exports.likeComment = async (req, res) => {
 // CRUD Operations for Replies
 exports.addReplyToComment = async (req, res) => {
     try {
-        const post = await Posts.findById(req.params.commentId);
+        const post = await Posts.findOne({'comments._id': req.params.commentId});
 
         if (!post) {
-            return res.status(404).json({ error: 'Post not found' });
+            return res.status(404).json({ error: 'Post containing this comment not found' });
         }
 
         const comment = post.comments.id(req.params.commentId);
