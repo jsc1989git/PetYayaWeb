@@ -8,6 +8,7 @@ const session = require('express-session');
 const passport = require('./server/config/passport');
 const { ensureAuthenticated, checkRole } = require('./server/middleware/auth');
 const MongoStore = require('connect-mongo');
+const helmet = require('helmet');
 
 const PORT = process.env.PORT || 3000;
 
@@ -15,6 +16,54 @@ const petyayaRoute = require('./server/routes/petyayaRoutes')
 const authRoutes = require('./server/routes/authRoutes');
 
 const path = require('path')
+
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: [
+          "'self'", 
+          "https://cdn.jsdelivr.net", 
+          "https://cdnjs.cloudflare.com",
+          "https://maps.googleapis.com", 
+          "https://unpkg.com",
+          "'unsafe-inline'" // For inline event handlers
+        ],
+        styleSrc: [
+          "'self'", 
+          "https://cdn.jsdelivr.net", 
+          "https://fonts.googleapis.com",
+          "https://unpkg.com",
+          "https://www.googleapis.com",
+          "'unsafe-inline'" 
+        ],
+        imgSrc: [
+          "'self'", 
+          "data:", 
+          "https://api.thecatapi.com",
+          "https://avataaars.io",
+          "https://*.googleapis.com",
+          'https://res.cloudinary.com'
+        ],
+        connectSrc: [
+          "'self'",
+          "https://api.thecatapi.com",
+          "https://api.cloudinary.com"
+        ],
+        fontSrc: [
+          "'self'", 
+          "https://fonts.googleapis.com", 
+          "https://fonts.gstatic.com", 
+          "https://cdn.jsdelivr.net"
+        ],
+        frameSrc: ["'self'"]
+      },
+      crossOriginEmbedderPolicy: false,
+      crossOriginResourcePolicy: { policy: "cross-origin"}
+    }
+  })
+);
 
 app.engine('ejs', ejsMate);
 app.set('view engine', 'ejs'); // Set EJS as the template engine
