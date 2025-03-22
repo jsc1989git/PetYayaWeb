@@ -1,6 +1,7 @@
 require('dotenv').config();
 const mongoose = require('mongoose');
 const Posts = require('../../models/posts');
+const User = require('../../models/user');
 const axios = require('axios');
 
 const gMapAPIKey = process.env.GOOGLE_MAP_API_KEY;
@@ -484,3 +485,24 @@ exports.addReplyToReply = async (req, res) => {
         res.status(404).json({ success: false, message: "Post not found" });
     }
 };
+
+exports.updateProfilePhoto = async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ error: 'No file uploaded' });
+      }
+  
+      // Update user's avatar in database
+      const user = await User.findByIdAndUpdate(
+        req.user.id,
+        { avatar: req.file.path },
+        { new: true }
+      );
+  
+      // Redirect back to profile
+      res.redirect('/profile');
+    } catch (error) {
+      console.error('Error updating profile photo:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  };

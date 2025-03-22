@@ -1,7 +1,8 @@
 const express = require('express');
 const router = express.Router();
+const { uploadMiddleware } = require('../config/cloudinary');
 const petyayaController = require('../controllers/petyayaController')
-const { ensureAuthenticated, checkRole } = require('../middleware/auth');
+const { ensureAuthenticated, checkRole} = require('../middleware/auth');
 const Post = require('../../models/posts');
 
 router.get('/', petyayaController.index)
@@ -44,5 +45,8 @@ router.delete("/delete-reply/:commentId/:replyId", ensureAuthenticated, petyayaC
 
 // Reply to a reply
 router.post('/reply-to-reply/:postId/:commentId/:replyId', ensureAuthenticated, petyayaController.addReplyToReply);
+
+// Upload photo route
+router.post('/update-profile-photo', ensureAuthenticated, uploadMiddleware.single('profilePhoto'), petyayaController.updateProfilePhoto);
 
 module.exports = router;
