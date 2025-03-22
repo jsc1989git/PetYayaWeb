@@ -36,6 +36,7 @@ app.use(
           "https://fonts.googleapis.com",
           "https://unpkg.com",
           "https://www.googleapis.com",
+          "https://*.google.com",
           "'unsafe-inline'" 
         ],
         imgSrc: [
@@ -44,6 +45,8 @@ app.use(
           "https://api.thecatapi.com",
           "https://avataaars.io",
           "https://*.googleapis.com",
+          "https://*.gstatic.com",
+          "https://*.google.com",
           "https://res.cloudinary.com",
           "https://*.googleusercontent.com",
           "https://lh3.googleusercontent.com",
@@ -52,7 +55,8 @@ app.use(
         connectSrc: [
           "'self'",
           "https://api.thecatapi.com",
-          "https://api.cloudinary.com"
+          "https://api.cloudinary.com",
+          "https://*.googleapis.com"
         ],
         fontSrc: [
           "'self'", 
