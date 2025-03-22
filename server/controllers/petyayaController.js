@@ -279,15 +279,20 @@ exports.editComment = async (req, res) => {
 };
 
 exports.deleteComment = async (req, res) => {
-    const post = await Posts.findOneAndUpdate({ 'comments._id': req.params.commentId },
-        { $pull: { comments: { _id: req.params.commentId } } },
-        { new
-        : true }
-    );
-    if (post) {
-        res.redirect('/feed');
-    } else {
-        res.status(404).json({ error: 'Comment not found' });
+    try {
+        const post = await Posts.findOneAndUpdate(
+            { 'comments._id': req.params.id },
+            { $pull: { comments: { _id: req.params.id } } },
+            { new: true }
+        );
+        if (!post) {
+            res.redirect('/feed');
+        } else {
+            return res.status(404).json({ error: 'Comment not found' });
+        }
+    } catch (error) {
+        console.error("Error deleting comment:", error);
+        res.status(500).json({ error: 'Internal server error' });
     }
 };
 
@@ -395,7 +400,7 @@ exports.likeReply = async (req, res) => {
 
 exports.editReply = async (req, res) => {
     try {
-        const post = await Posts.findOneAndUpdate(
+        const post = await Posts.findOne(
             { 'comments.replies._id': req.params.id }
         );
 
@@ -412,6 +417,11 @@ exports.editReply = async (req, res) => {
         }
 
         const reply = comment.replies.id(req.params.id);
+
+        if (reply.author.toString() !== req.user.id) {
+            return res.status(403).json({ error: 'You can only edit your own replies'});
+        }
+
         reply.text = req.body.text;
 
         await post.save();
@@ -424,7 +434,7 @@ exports.editReply = async (req, res) => {
 
 exports.deleteReply = async (req, res) => {
     try {
-        const post = await Posts.findOneAndUpdate({
+        const post = await Posts.findOne({
             'comments.replies._id': req.params.replyId
         })
 
@@ -438,6 +448,11 @@ exports.deleteReply = async (req, res) => {
 
         if (!comment) {
             return res.status(404).json({ error: 'Comment not found' });
+        }
+
+        const reply = comment.replies.id(req.params.replyId);
+        if (reply && reply.author.toString() !== req.user.id) {
+            return res.status(403).json({ error: 'You can only delete your own replies' });
         }
 
         comment.replies = comment.replies.filter(reply =>
