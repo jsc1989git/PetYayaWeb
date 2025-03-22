@@ -191,18 +191,19 @@ exports.deletePost = async (req, res) => {
 
 exports.likePost = async (req, res) => {
     try {
-        const { userId } = req.body; // Ensure userId is sent in the request
+        const userId = req.user.id;
         const post = await Posts.findById(req.params.id);
 
         if (!post) {
             return res.status(404).json({ error: 'Post not found' });
         }
 
-        const hasLiked = post.likes.includes(userId);
+        const userIdStr = userId.toString();
+        const hasLiked = post.likes.some(id => id.toString() === userIdStr);  
 
         if (hasLiked) {
             // Unlike: Remove userId from likes array
-            post.likes = post.likes.filter(userId => userId !== userId);
+            post.likes = post.likes.filter(id => id.toString() !== userIdStr);
         } else {
             // Like: Add userId to likes array
             post.likes.push(userId);
@@ -220,24 +221,60 @@ exports.likePost = async (req, res) => {
 
 // CRUD Operations for Comments
 exports.addComment = async (req, res) => {
-    const post = await Posts.findById(req.params.id);
-    if (post) {
-        post.comments.push({ text: req.body.comment, likes: [], replies: [] });
+    try {
+        const post = await Posts.findById(req.params.id);
+
+        if (!post) {
+            return res.status(404).json({ error: 'Post not found' });
+        }
+
+        const { text } = req.body; // Get comment text from request body
+
+        if (!text) {
+            return res.status(400).json({ error: 'Comment text is required' });
+        }
+
+        post.comments.push({ 
+            text,
+            likes: [],
+            author: req.user.id,
+            replies: [] 
+        });
+
         await post.save();
         res.redirect('/feed');
-    } else {
-        res.status(404).send("Post not found");
+    } catch (error) {
+        console.error("Error adding comment:", error);
+        res.status(500).json({ error: 'Internal server error' });
     }
 };
 
 exports.editComment = async (req, res) => {
-    const post = await Posts.findOne({ 'comments._id': req.params.commentId });
-    if (post) {
-        post.comments.id(req.params.commentId).text = req.body.comment;
+    try {
+        const post = await Posts.findOneAndUpdate(
+            { 'comments._id': req.params.id }
+        )
+
+        if (!post) {
+            return res.status(404).json({ error: 'Comment not found' });
+        }
+
+        const comment = post.comments.id(req.params.id);
+        const userIdStr = req.user.id.toString();
+
+        const alreadyLiked = comment.likes.some(id => id.toString() === userIdStr);
+
+        if (alreadyLiked) {
+            comment.likes = comment.likes.filter(id => id.toString() !== userIdStr);
+        } else {
+            comment.likes.push(req.user.id);
+        }
+
         await post.save();
-        res.redirect('/feed');
-    } else {
-        res.status(404).json({ error: 'Comment not found' });
+        res.json({ likes: comment.likes.length });
+    } catch (error) {
+        console.error("Error liking comment:", error);
+        res.status(500).json({ error: 'Internal server error' });
     }
 };
 
@@ -255,32 +292,68 @@ exports.deleteComment = async (req, res) => {
 };
 
 exports.likeComment = async (req, res) => {
-    const post = await Posts.findOne({ 'comments._id': req.params.commentId });
-    if (post) {
-        const comment = post.comments.id(req.params.commentId);
-        if (!comment.likedBy.includes(req.user.id)) {
-            comment.likes += 1;
-            comment.likedBy.push(req.user.id);
-        } else {
-            comment.likes -= 1;
-            comment.likedBy = comment.likedBy.filter(userId => userId !== req.user.id);
+    try {
+        const post = await Posts.findOne({ 'comments._id': req.params.commentId });
+
+        if (!post) {
+            return res.status(404).json({ error: 'Comment not found' });
         }
+
+        const comment = post.comments.id(req.params.commentId);
+        const userIdStr = req.user.id.toString();
+
+        if (!comment) {
+            return res.status(404).json({ error: 'Comment not found' });
+        }
+
+        const alreadyLiked = comment.likes.some(id => id.toString() === userIdStr);
+
+        if (alreadyLiked) {
+            comment.likes = comment.likes.filter(id => id.toString() !== userIdStr);
+        } else {
+            comment.likes.push(req.user.id);
+        }
+
         await post.save();
-        res.json({ likes: comment.likes });
-    } else {
-        res.status(404).json({ error: 'Comment not found' });
+        res.json({ likes: comment.likes.length });
+    } catch (error) {
+        console.error("Error liking comment:", error);
+        res.status(500).json({ error: 'Internal server error' });
     }
 };
 
 // CRUD Operations for Replies
 exports.addReplyToComment = async (req, res) => {
-    const post = await Posts.findOne({ 'comments._id': req.params.commentId });
-    if (post) {
-        post.comments.id(req.params.commentId).replies.push({ text: req.body.text, likes: 0 });
+    try {
+        const post = await Posts.findById(req.params.commentId);
+
+        if (!post) {
+            return res.status(404).json({ error: 'Post not found' });
+        }
+
+        const comment = post.comments.id(req.params.commentId);
+
+        if (!comment) {
+            return res.status(404).json({ error: 'Comment not found' });
+        }
+
+        const { text } = req.body; // Get reply text from request body
+
+        if (!text) {
+            return res.status(400).json({ error: 'Reply text is required' });
+        }
+
+        comment.replies.push({
+            text,
+            likes: [],
+            author: req.user.id
+        });
+
         await post.save();
         res.redirect('/feed');
-    } else {
-        res.status(404).send("Comment not found");
+    } catch (error) {
+        console.error("Error adding reply:", error);
+        res.status(500).json({ error: 'Internal server error' });
     }
 };
 
@@ -292,30 +365,27 @@ exports.likeReply = async (req, res) => {
             return res.status(404).json({ error: 'Reply not found' });
         }
 
-        // Find the comment that contains the reply
-        const comment = post.comments.find(comment => comment.replies.id(req.params.replyId));
+        const comment = post.comments.find(comment =>
+            comment.replies.some(reply => reply._id.toString() === req.params.replyId
+        ));
 
         if (!comment) {
             return res.status(404).json({ error: 'Comment not found' });
         }
 
-        // Find the reply inside the comment
         const reply = comment.replies.id(req.params.replyId);
+        const userIdStr = req.user.id.toString();
 
-        if (!reply) {
-            return res.status(404).json({ error: 'Reply not found' });
-        }
+        const alreadyLiked = reply.likes.some(id => id.toString() === userIdStr);
 
-        if (!reply.likedBy.includes(req.user._id)) {
-            reply.likes -= 1;
-            reply.likedBy.push(req.user.id);
+        if (alreadyLiked) {
+            reply.likes = reply.likes.filter(id => id.toString() !== userIdStr);
         } else {
-            reply.likes += 1;
-            reply.likedBy = reply.likedBy.filter(userId => userId !== req.user.id);
+            reply.likes.push(req.user.id);
         }
-        await post.save();
 
-        res.json({ likes: reply.likes });
+        await post.save();
+        res.json({ likes: reply.likes.length });
 
     } catch (error) {
         console.error("Error liking reply:", error);
@@ -324,13 +394,62 @@ exports.likeReply = async (req, res) => {
 };
 
 exports.editReply = async (req, res) => {
-    await Posts.updateOne({ 'comments.replies._id': req.params.id }, { $set: { 'comments.$.replies.$[reply].text': req.body.reply } }, { arrayFilters: [{ 'reply._id': req.params.id }] });
-    res.redirect('/feed');
+    try {
+        const post = await Posts.findOneAndUpdate(
+            { 'comments.replies._id': req.params.id }
+        );
+
+        if (!post) {
+            return res.status(404).json({ error: 'Reply not found' });
+        }
+
+        const comment = post.comments.find(comment =>
+            comment.replies.some(reply => reply._id.toString() === req.params.id)
+        );
+
+        if (!comment) {
+            return res.status(404).json({ error: 'Comment not found' });
+        }
+
+        const reply = comment.replies.id(req.params.id);
+        reply.text = req.body.text;
+
+        await post.save();
+        res.redirect('/feed');
+    } catch (error) {
+        console.error("Error editing reply:", error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
 };
 
 exports.deleteReply = async (req, res) => {
-    await Posts.updateOne({}, { $pull: { 'comments.$[].replies': { _id: req.params.id } } });
-    res.redirect('/feed');
+    try {
+        const post = await Posts.findOneAndUpdate({
+            'comments.replies._id': req.params.replyId
+        })
+
+        if (!post) {
+            return res.status(404).json({ error: 'Reply not found' });
+        }
+
+        const comment = post.comments.find(comment =>
+            comment.replies.some(reply => reply._id.toString() === req.params.replyId)
+        );
+
+        if (!comment) {
+            return res.status(404).json({ error: 'Comment not found' });
+        }
+
+        comment.replies = comment.replies.filter(reply =>
+            reply._id.toString() !== req.params.replyId
+        );
+
+        await post.save();
+        res.redirect('/feed');
+    } catch (error) {
+        console.error("Error deleting reply:", error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
 };
 
 exports.addReplyToReply = async (req, res) => {
