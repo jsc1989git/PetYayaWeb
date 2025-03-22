@@ -155,13 +155,13 @@
   
         <!-- Post Actions -->
         <div class="mt-2 d-flex justify-content-end gap-2">
-          <button class="btn btn-sm btn-brand" onclick="likePost('<%= post._id %>')">
+          <button class="btn btn-sm btn-brand like-post-btn" data-post-id="<%= post._id %>">
             Like (<span id="like-like-post-<%= post._id %>"><%= post.likes.length %></span>)
           </button>        
           <button class="btn btn-sm btn-brand" data-bs-toggle="modal" data-bs-target="#commentModal-<%= post._id %>">Comment</button>
           <% if (user && post.author && post.author._id.toString() === user._id.toString()) { %>
           <a href="#" class="btn btn-sm btn-brand" data-bs-toggle="modal" data-bs-target="#EditForm-<%= post._id %>">Edit</a>
-          <form class="d-inline" action="/delete-post/<%= post._id %>?_method=DELETE" method="POST" onsubmit="return confirm('Delete this post?')">
+          <form class="d-inline delete-form" action="/delete-post/<%= post._id %>?_method=DELETE" method="POST" data-confirm-message="Delete this post?">
             <button type="submit" class="btn btn-sm btn-danger">Delete</button>
           </form>
           <% } %>
@@ -192,13 +192,13 @@
   
           <!-- Comment Actions -->
           <div class="mt-2 d-flex justify-content-end gap-2">
-            <button class="btn btn-sm btn-brand" onclick="likeComment('<%= comment._id %>')">
+            <button class="btn btn-sm btn-brand like-comment-btn" data-comment-id="<%= comment._id %>">
               Like (<span id="like-like-comment-<%= comment._id %>"><%= comment.likes.length %></span>)
             </button>          
-            <button onclick="openReplyModal('<%= comment._id %>', 'comment')" class="btn btn-sm btn-brand">Reply</button>
+            <button class="btn btn-sm btn-brand reply-btn" data-comment-id="<%= comment._id %>" data-type="comment">Reply</button>
             <% if (comment.author && user && comment.author._id.toString() === user._id.toString()) { %>
-              <a href="#" class="btn btn-sm btn-brand" onclick="openEditModal('<%= comment._id %>', '<%= comment.text %>', 'comment')">Edit</a>
-              <form class="d-inline" action="/delete-comment/<%= comment._id %>?_method=DELETE" method="POST" onsubmit="return confirm('Delete this comment?')">
+              <a href="#" class="btn btn-sm btn-brand edit-btn" data-id="<%= comment._id %>" data-content="<%= comment.text %>" data-type="comment">Edit</a>              
+                <form class="d-inline delete-form" action="/delete-comment/<%= comment._id %>?_method=DELETE" method="POST" data-confirm-message="Delete this comment?">
                 <button type="submit" class="btn btn-sm btn-danger">Delete</button>
               </form>
             <% } %>
@@ -228,12 +228,12 @@
   
             <!-- Reply Actions -->
             <div class="mt-2 d-flex justify-content-end gap-2">
-              <button class="btn btn-sm btn-brand" onclick="likeReply('<%= reply._id %>')">
+              <button class="btn btn-sm btn-brand like-reply-btn" data-reply-id="<%= reply._id %>">
                 Like (<span id="like-like-reply-<%= reply._id %>"><%= reply.likes.length %></span>)
               </button>
               <% if (reply.author && user && reply.author._id.toString() === user._id.toString()) { %>            
-              <a href="#" class="btn btn-sm btn-brand" onclick="openEditModal('<%= reply._id %>', '<%= reply.text %>', 'reply')">Edit</a>
-              <form class="d-inline" action="/delete-reply/<%= comment._id %>/<%= reply._id %>?_method=DELETE" method="POST" onsubmit="return confirm('Delete this reply?')">
+                <a href="#" class="btn btn-sm btn-brand edit-btn" data-id="<%= reply._id %>" data-content="<%= reply.text %>" data-type="reply">Edit</a>
+              <form class="d-inline delete-form" action="/delete-reply/<%= reply._id %>?_method=DELETE" method="POST" data-confirm-message="Delete this reply?">
                 <button type="submit" class="btn btn-sm btn-danger">Delete</button>
               </form>
               <% } %>
@@ -582,6 +582,67 @@
           console.error('Reply modal not found');
         }
       }
+
+      document.addEventListener('DOMContentLoaded', function() {
+        // Like post buttons
+        document.querySelectorAll('.like-post-btn').forEach(button => {
+          button.addEventListener('click', function() {
+            const postId = this.getAttribute('data-post-id');
+            updateLikeCount(postId, 'like-post');
+          });
+        });
+
+        // Like comment buttons
+        document.querySelectorAll('.like-comment-btn').forEach(button => {
+          button.addEventListener('click', function() {
+            const commentId = this.getAttribute('data-comment-id');
+            updateLikeCount(commentId, 'like-comment');
+          });
+        });
+
+        // Like reply buttons
+        document.querySelectorAll('.like-reply-btn').forEach(button => {
+          button.addEventListener('click', function() {
+            const replyId = this.getAttribute('data-reply-id');
+            updateLikeCount(replyId, 'like-reply');
+          });
+        });
+
+        // Reply buttons
+        document.querySelectorAll('.reply-btn').forEach(button => {
+          button.addEventListener('click', function() {
+            const commentId = this.getAttribute('data-comment-id');
+            const type = this.getAttribute('data-type');
+            openReplyModal(commentId, type);
+          });
+        });
+
+        // Edit buttons
+        document.querySelectorAll('.edit-btn').forEach(button => {
+          button.addEventListener('click', function(e) {
+            e.preventDefault();
+            const id = this.getAttribute('data-id');
+            const content = this.getAttribute('data-content');
+            const type = this.getAttribute('data-type');
+            openEditModal(id, content, type);
+          });
+        });
+
+        // Delete confirmation
+        document.querySelectorAll('.delete-form').forEach(form => {
+          form.addEventListener('submit', function(e) {
+            const confirmMessage = this.getAttribute('data-confirm-message');
+            if (!confirm(confirmMessage)) {
+              e.preventDefault();
+            }
+          });
+        });
+        
+        // Convert timestamps to "time ago" format
+        document.querySelectorAll('[data-timeago]').forEach(el => {
+          el.innerText = timeago.format(el.getAttribute('data-timeago'));
+        });
+      });
 
       //Convert timestamps to "time ago" format
       document.querySelectorAll('[data-timeago]').forEach(el => {
