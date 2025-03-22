@@ -44,7 +44,9 @@ app.use(
           "https://api.thecatapi.com",
           "https://avataaars.io",
           "https://*.googleapis.com",
-          'https://res.cloudinary.com'
+          "https://res.cloudinary.com",
+          "https://*.googleusercontent.com",
+          "https://lh3.googleusercontent.com"
         ],
         connectSrc: [
           "'self'",
