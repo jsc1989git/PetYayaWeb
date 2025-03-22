@@ -37,8 +37,11 @@
     </button>
     <div class="collapse navbar-collapse" id="navbarNav">
       <ul class="navbar-nav ms-auto">
+            <li>
+                <a class="nav-link" href="/admin">Admin</a>
+            </li>
             <li class="nav-item">
-              <a class="nav-link" href="#timeline">Timeline</a>
+              <a class="nav-link" href="/feed">Timeline</a>
             </li>
             <li class="nav-item">
               <a class="nav-link" href="#faq">FAQ's</a>
@@ -155,14 +158,12 @@
   
           <!-- Comment Actions -->
           <div class="mt-2 d-flex justify-content-end gap-2">
-            <button class="btn btn-sm btn-brand" onclick="likeComment('<%= comment._id %>')">Like (<span id="like-like-comment-<%= comment._id %>"><%= comment.likes %></span>)</button>          
+            <button class="btn btn-sm btn-brand" onclick="likeComment('<%= comment._id %>')">Like (<span id="like-like-comment-<%= comment._id %>"><%= comment.likes.length %></span>)</button>          
             <button onclick="openReplyModal('<%= comment._id %>', 'comment')" class="btn btn-sm btn-brand">Reply</button>
-            <% if (comment.author && user && comment.author.toString() === user._id.toString()) { %>
               <a href="#" class="btn btn-sm btn-brand" onclick="openEditModal('<%= comment._id %>', '<%= comment.text %>', 'comment')">Edit</a>
               <form class="d-inline" action="/delete-comment/<%= comment._id %>?_method=DELETE" method="POST" onsubmit="return confirm('Delete this comment?')">
                 <button type="submit" class="btn btn-sm btn-danger">Delete</button>
               </form>
-            <% } %>
           </div>
         </div>
   
@@ -180,7 +181,7 @@
   
             <!-- Reply Actions -->
             <div class="mt-2 d-flex justify-content-end gap-2">
-              <button class="btn btn-sm btn-brand" onclick="likeReply('<%= reply._id %>')">Like (<span id="like-like-reply-<%= reply._id %>"><%= reply.likes %></span>)</button>            
+              <button class="btn btn-sm btn-brand" onclick="likeReply('<%= reply._id %>')">Like (<span id="like-like-reply-<%= reply._id %>"><%= reply.likes.length %></span>)</button>            
               <a href="#" class="btn btn-sm btn-brand" onclick="openEditModal('<%= reply._id %>', '<%= reply.text %>', 'reply')">Edit</a>
               <form class="d-inline" action="/delete-reply/<%= comment._id %>/<%= reply._id %>?_method=DELETE" method="POST" onsubmit="return confirm('Delete this reply?')">
                 <button type="submit" class="btn btn-sm btn-danger">Delete</button>
@@ -239,7 +240,7 @@
       </div>
     </div>
   </div>
-  <% }); %>
+ 
   
   <!-- Comment Modal -->
   <div class="modal fade" id="replyModal" tabindex="-1" aria-labelledby="replyModalLabel" aria-hidden="true">
@@ -262,6 +263,29 @@
     </div>
   </div>
 </div>
+
+<!-- Reply Edit Modal -->
+<div class="modal fade" id="editReplyModal" tabindex="-1" aria-labelledby="editReplyModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header d-flex justify-content-center position-relative">
+          <h5 class="modal-title text-center w-100" id="editReplyModalLabel">Edit Reply</h5>
+          <button type="button" class="btn-close position-absolute top-0 end-0 m-2" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form id="editReplyForm" method="POST">
+          <div class="modal-body">
+            <textarea id="editReplyContent" name="text" class="form-control" placeholder="Edit your reply..."></textarea>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-brand">Save Changes</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <% }); %>
 
  <!-- Accordion -->
  <div
@@ -405,10 +429,48 @@
       function likeReply(replyId) { updateLikeCount(replyId, 'like-reply'); }
 
       // Open Edit Modal
+      // Open Edit Modal
       function openEditModal(id, content, type) {
-        document.getElementById('editContent').value = content;
-        document.getElementById('editForm').action = `/edit-${type}/${id}`;
-        new bootstrap.Modal(document.getElementById('editModal')).show();
+        if (type === 'reply') {
+          const editModal = document.getElementById('editReplyModal');
+          if (editModal) {
+            const form = editModal.querySelector('form');
+            form.action = `/edit-reply/${id}`;
+            const textarea = editModal.querySelector('textarea');
+            if (textarea) {
+              textarea.value = content;
+            }
+            new bootstrap.Modal(editModal).show();
+          } else {
+            console.error('Edit modal not found');
+          }
+        } else if (type === 'comment') {
+          const editModal = document.getElementById('editReplyModal');
+          if (editModal) {
+            const form = editModal.querySelector('form');
+            form.action = `/edit-comment/${id}`;
+            const textarea = editModal.querySelector('textarea');
+            if (textarea) {
+              textarea.value = content;
+            }
+            new bootstrap.Modal(editModal).show();
+          } else {
+            console.error('Edit modal not found');
+          }
+        } else if (type === 'post') {
+          const editModal = document.getElementById('EditForm-' + id);
+          if (editModal) {
+            const textarea = editModal.querySelector('textarea');
+            if (textarea) {
+              textarea.value = content;
+            }
+            new bootstrap.Modal(editModal).show();
+          } else {
+            console.error('Edit modal not found');
+          }
+        } else {
+          console.error('Unknown edit type: ', type);
+        }
       }
 
       // Open Reply Modal

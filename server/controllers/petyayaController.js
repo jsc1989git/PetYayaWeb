@@ -45,8 +45,18 @@ exports.posts = async (req, res) => {
 //Fetch owner posts and render the profile page
 exports.profile = async (req, res) => {
     try {
-        const posts = await Posts.find({ author: req.user.id }).sort({ createdAt: -1 });
-        res.render('profile', { posts, googleMapsApiKey: gMapAPIKey });
+        const posts = await Posts.find({ author: req.user.id })
+            .populate('author', 'name avatar')
+            .populate({
+                path: "comments.author", // Populate comment author
+                select: "name avatar"
+            })
+            .populate({
+                path: "comments.replies.author", // Populate reply author
+                select: "name avatar"
+            })
+            .sort({ createdAt: -1 });
+        res.render('profile', { posts, user: req.user, googleMapsApiKey: gMapAPIKey });
     } catch (error) {
         console.error("Error fetching posts:", error);
         res.render('profile', { posts: [] });
@@ -94,32 +104,7 @@ exports.addPost = async (req, res) => {
         });
 
         await newPost.save();
-        res.redirect("/feed");
-    } catch (error) {
-        console.error("Error adding post:", error);
-        res.status(500).json({ error: "Error adding post" });
-    }
-};
-
-exports.addPostProfile = async (req, res) => {
-    try {
-        if (!req.user || !req.user.id) {
-            return res.status(401).json({ error: "Unauthorized. Please log in." });
-        }
-
-        const { content } = req.body.post; // Get post content from request body
-
-        if (!content) {
-            return res.status(400).json({ error: "Content is required" });
-        }
-
-        const newPost = new Posts({
-            content,
-            author: req.user.id, // Set the author to the logged-in user
-        });
-
-        await newPost.save();
-        res.redirect("/profile");
+        res.redirect(req.get('Referer') || '/feed');
     } catch (error) {
         console.error("Error adding post:", error);
         res.status(500).json({ error: "Error adding post" });
@@ -141,14 +126,14 @@ exports.editPost = async (req, res) => {
             return res.status(404).json({ error: "Post not found" });
         }
 
-        if (post.author.toString() !== req.user.id) {
+        if (post.author.toString() !== req.user.id && req.user.role !== 'admin') {
             return res.status(403).json({ error: "You can only edit your own posts" });
         }
 
         post.content = req.body.post.content;
         await post.save();
 
-        res.redirect('/feed');
+        res.redirect(req.get('Referer') || '/feed');
     } catch (error) {
         console.error("Error editing post:", error);
         res.status(500).json({ error: "Internal server error" });
@@ -175,13 +160,13 @@ exports.deletePost = async (req, res) => {
         }
 
         // Check if the logged-in user is the author
-        if (post.author.toString() !== req.user.id) {
+        if (post.author.toString() !== req.user.id && req.user.role !== 'admin') {
             return res.status(403).json({ error: "You can only delete your own posts" });
         }
 
         // Delete post
         await post.deleteOne();
-        res.redirect('/feed');
+        res.redirect(req.get('Referer') || '/feed');
 
     } catch (error) {
         console.error("Error deleting post:", error);
@@ -242,7 +227,7 @@ exports.addComment = async (req, res) => {
         });
 
         await post.save();
-        res.redirect('/feed');
+        res.redirect(req.get('Referer') || '/feed');
     } catch (error) {
         console.error("Error adding comment:", error);
         res.status(500).json({ error: 'Internal server error' });
@@ -251,7 +236,7 @@ exports.addComment = async (req, res) => {
 
 exports.editComment = async (req, res) => {
     try {
-        const post = await Posts.findOneAndUpdate(
+        const post = await Posts.findOne(
             { 'comments._id': req.params.id }
         )
 
@@ -260,18 +245,15 @@ exports.editComment = async (req, res) => {
         }
 
         const comment = post.comments.id(req.params.id);
-        const userIdStr = req.user.id.toString();
 
-        const alreadyLiked = comment.likes.some(id => id.toString() === userIdStr);
-
-        if (alreadyLiked) {
-            comment.likes = comment.likes.filter(id => id.toString() !== userIdStr);
-        } else {
-            comment.likes.push(req.user.id);
+        if(comment.author.toString() !== req.user.id && req.user.role !== 'admin') {
+            return res.status(403).json({ error: 'You can only edit your own comments' });
         }
 
+        comment.text = req.body.text;
+
         await post.save();
-        res.json({ likes: comment.likes.length });
+        res.redirect(req.get('Referer') || '/feed');
     } catch (error) {
         console.error("Error liking comment:", error);
         res.status(500).json({ error: 'Internal server error' });
@@ -280,16 +262,31 @@ exports.editComment = async (req, res) => {
 
 exports.deleteComment = async (req, res) => {
     try {
-        const post = await Posts.findOneAndUpdate(
-            { 'comments._id': req.params.id },
-            { $pull: { comments: { _id: req.params.id } } },
-            { new: true }
-        );
+
+        const post = await Posts.findOne({ 'comments._id': req.params.commentId });
+
         if (!post) {
-            res.redirect('/feed');
-        } else {
             return res.status(404).json({ error: 'Comment not found' });
         }
+
+        const comment = post.comments.id(req.params.commentId);
+
+        if (!comment) {
+            return res.status(404).json({ error: 'Comment not found' });
+        }
+
+        if (comment.author.toString() !== req.user.id && req.user.role !== 'admin') {
+            return res.status(403).json({ error: 'You can only delete your own comments' });
+        }
+
+        await Posts.findOneAndUpdate(
+            { 'comments._id': req.params.commentId },
+            { $pull: { comments: { _id: req.params.commentId } } },
+            { new: true }
+        );
+
+        res.redirect(req.get('Referer') || '/feed');
+        
     } catch (error) {
         console.error("Error deleting comment:", error);
         res.status(500).json({ error: 'Internal server error' });
@@ -355,7 +352,7 @@ exports.addReplyToComment = async (req, res) => {
         });
 
         await post.save();
-        res.redirect('/feed');
+        res.redirect(req.get('Referer') || '/feed');
     } catch (error) {
         console.error("Error adding reply:", error);
         res.status(500).json({ error: 'Internal server error' });
@@ -418,14 +415,14 @@ exports.editReply = async (req, res) => {
 
         const reply = comment.replies.id(req.params.id);
 
-        if (reply.author.toString() !== req.user.id) {
+        if (reply.author.toString() !== req.user.id && req.user.role !== 'admin') {
             return res.status(403).json({ error: 'You can only edit your own replies'});
         }
 
         reply.text = req.body.text;
 
         await post.save();
-        res.redirect('/feed');
+        res.redirect(req.get('Referer') || '/feed');
     } catch (error) {
         console.error("Error editing reply:", error);
         res.status(500).json({ error: 'Internal server error' });
@@ -451,7 +448,7 @@ exports.deleteReply = async (req, res) => {
         }
 
         const reply = comment.replies.id(req.params.replyId);
-        if (reply && reply.author.toString() !== req.user.id) {
+        if (reply && reply.author.toString() !== req.user.id && req.user.role !== 'admin') {
             return res.status(403).json({ error: 'You can only delete your own replies' });
         }
 
@@ -460,7 +457,7 @@ exports.deleteReply = async (req, res) => {
         );
 
         await post.save();
-        res.redirect('/feed');
+        res.redirect(req.get('Referer') || '/feed');
     } catch (error) {
         console.error("Error deleting reply:", error);
         res.status(500).json({ error: 'Internal server error' });
@@ -476,7 +473,7 @@ exports.addReplyToReply = async (req, res) => {
             if (reply) {
                 comment.replies.push({ text: req.body.text });
                 await post.save();
-                res.json({ success: true, message: "Reply added successfully" });
+                res.redirect(req.get('Referer') || '/feed');
             } else {
                 res.status(404).json({ success: false, message: "Reply not found" });
             }

@@ -37,6 +37,11 @@
     </button>
     <div class="collapse navbar-collapse" id="navbarNav">
       <ul class="navbar-nav ms-auto">
+        <% if (user.role === 'admin') { %>
+          <li class="nav-item">
+            <a class="nav-link text-danger" href="/admin">Admin</a>
+          </li>
+        <% } %>
             <li class="nav-item">
               <a class="nav-link" href="#timeline">Timeline</a>
             </li>
@@ -46,7 +51,16 @@
             <% if (user) { %>
               <li class="nav-item">
                 <a class="nav-link" href="/profile">
-                  <%= user.name %>
+                  <% if (user && user.name) { %>
+                    <% 
+                      const nameParts = user.name.split(' ');
+                      const firstName = nameParts[0];
+                      const lastInitial = nameParts.length > 1 ? nameParts[nameParts.length - 1].charAt(0) + '.' : '';
+                    %>
+                    <%= firstName %> <%= lastInitial %>
+                  <% } else { %>
+                    Profile
+                  <% } %>
                 </a>
               </li>
               <li class="nav-item">
@@ -173,7 +187,7 @@
               Like (<span id="like-like-comment-<%= comment._id %>"><%= comment.likes.length %></span>)
             </button>          
             <button onclick="openReplyModal('<%= comment._id %>', 'comment')" class="btn btn-sm btn-brand">Reply</button>
-            <% if (comment.author && user && comment.author.toString() === user._id.toString()) { %>
+            <% if (comment.author && user && comment.author._id.toString() === user._id.toString()) { %>
               <a href="#" class="btn btn-sm btn-brand" onclick="openEditModal('<%= comment._id %>', '<%= comment.text %>', 'comment')">Edit</a>
               <form class="d-inline" action="/delete-comment/<%= comment._id %>?_method=DELETE" method="POST" onsubmit="return confirm('Delete this comment?')">
                 <button type="submit" class="btn btn-sm btn-danger">Delete</button>
@@ -201,11 +215,13 @@
             <div class="mt-2 d-flex justify-content-end gap-2">
               <button class="btn btn-sm btn-brand" onclick="likeReply('<%= reply._id %>')">
                 Like (<span id="like-like-reply-<%= reply._id %>"><%= reply.likes.length %></span>)
-              </button>            
+              </button>
+              <% if (reply.author && user && reply.author._id.toString() === user._id.toString()) { %>            
               <a href="#" class="btn btn-sm btn-brand" onclick="openEditModal('<%= reply._id %>', '<%= reply.text %>', 'reply')">Edit</a>
               <form class="d-inline" action="/delete-reply/<%= comment._id %>/<%= reply._id %>?_method=DELETE" method="POST" onsubmit="return confirm('Delete this reply?')">
                 <button type="submit" class="btn btn-sm btn-danger">Delete</button>
               </form>
+              <% } %>
             </div>
           </div>
         <% }); %>
@@ -260,8 +276,7 @@
       </div>
     </div>
   </div>
-  <% }); %>
-  
+
   <!-- Reply Modal -->
   <div class="modal fade" id="replyModal" tabindex="-1" aria-labelledby="replyModalLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -304,6 +319,9 @@
     </div>
   </div>
 </div>
+  <% }); %>
+  
+  
 
  <!-- Accordion -->
  <div
@@ -496,16 +514,33 @@
 
       // Open Edit Modal
       function openEditModal(id, content, type) {
-        const editModal = document.getElementById('editReplyModal');
-        if (editModal) {
-          const form = editModal.querySelector('form');
-          form.action = `/edit-${type}/${id}`;
-          const textarea = editModal.querySelector('textarea');
-          if (textarea) {
-            textarea.value = content;
+        if (type === 'reply') {
+          const editModal = document.getElementById('editReplyModal');
+          if (editModal) {
+            const form = editModal.querySelector('form');
+            form.action = `/edit-reply/${id}`;
+            const textarea = editModal.querySelector('textarea');
+            if (textarea) {
+              textarea.value = content;
+            }
+            new bootstrap.Modal(editModal).show();
+          } else {
+            console.error('Edit modal not found');
           }
-          new bootstrap.Modal(editModal).show();
-        } else {
+        } else if (type === 'comment') {
+          const editModal = document.getElementById('editReplyModal');
+          if (editModal) {
+            const form = editModal.querySelector('form');
+            form.action = `/edit-comment/${id}`;
+            const textarea = editModal.querySelector('textarea');
+            if (textarea) {
+              textarea.value = content;
+            }
+            new bootstrap.Modal(editModal).show();
+          } else {
+            console.error('Edit modal not found');
+          }
+        } else if (type === 'post') {
           const editModal = document.getElementById('EditForm-' + id);
           if (editModal) {
             const textarea = editModal.querySelector('textarea');
@@ -516,6 +551,8 @@
           } else {
             console.error('Edit modal not found');
           }
+        } else {
+          console.error('Unknown edit type: ', type);
         }
       }
 
