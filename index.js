@@ -46,7 +46,8 @@ app.use(
           "https://*.googleapis.com",
           "https://res.cloudinary.com",
           "https://*.googleusercontent.com",
-          "https://lh3.googleusercontent.com"
+          "https://lh3.googleusercontent.com",
+          "https://cdn2.thecatapi.com"
         ],
         connectSrc: [
           "'self'",
