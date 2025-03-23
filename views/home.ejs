@@ -217,12 +217,14 @@
                       alt="User Avatar">
               </div>
             </div>
-              <div class="d-flex flex-column align-items-start">
-                <small class="opacity-50 no-wrap">
-                  <%= reply.author ? reply.author.name : "Unknown User" %>
-                </small>
-                <strong><%= reply.text %></strong>
-                <small class="opacity-50 no-wrap" data-timeago="<%= reply.createdAt %>"></small>
+              <div class="flex-grow-1 ms-3">
+                <div class="d-flex flex-column align-items-start">
+                  <small class="opacity-50 no-wrap">
+                    <%= reply.author ? reply.author.name : "Unknown User" %>
+                  </small>
+                  <strong><%= reply.text %></strong>
+                  <small class="opacity-50 no-wrap" data-timeago="<%= reply.createdAt %>"></small>
+                </div>
               </div>
             </div>
   
@@ -233,7 +235,7 @@
               </button>
               <% if (reply.author && user && reply.author._id.toString() === user._id.toString()) { %>            
                 <a href="#" class="btn btn-sm btn-brand edit-btn" data-id="<%= reply._id %>" data-content="<%= reply.text %>" data-type="reply">Edit</a>
-              <form class="d-inline delete-form" action="/delete-reply/<%= reply._id %>?_method=DELETE" method="POST" data-confirm-message="Delete this reply?">
+              <form class="d-inline delete-form" action="/delete-reply/<%= comment._id %>/<%= reply._id %>?_method=DELETE" method="POST" data-confirm-message="Delete this reply?">
                 <button type="submit" class="btn btn-sm btn-danger">Delete</button>
               </form>
               <% } %>

@@ -433,22 +433,22 @@ exports.editReply = async (req, res) => {
 exports.deleteReply = async (req, res) => {
     try {
         const post = await Posts.findOne({
+            'comments._id': req.params.commentId,
             'comments.replies._id': req.params.replyId
         })
 
         if (!post) {
-            return res.status(404).json({ error: 'Reply not found' });
+            return res.status(404).json({ error: 'Post not found' });
         }
 
-        const comment = post.comments.find(comment =>
-            comment.replies.some(reply => reply._id.toString() === req.params.replyId)
-        );
+        const comment = post.comments.id(req.params.commentId);
 
         if (!comment) {
             return res.status(404).json({ error: 'Comment not found' });
         }
 
         const reply = comment.replies.id(req.params.replyId);
+        
         if (reply && reply.author.toString() !== req.user.id && req.user.role !== 'admin') {
             return res.status(403).json({ error: 'You can only delete your own replies' });
         }
