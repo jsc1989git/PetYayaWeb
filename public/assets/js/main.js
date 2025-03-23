@@ -153,3 +153,4 @@ document.getElementById("loginButton").addEventListener("click", function () {
   const loginModal = new bootstrap.Modal(document.getElementById("ModalForm"));
   loginModal.show(); // Open the login modal
 });
+

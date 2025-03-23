@@ -135,10 +135,13 @@
   
         <!-- Post Actions -->
         <div class="mt-2 d-flex justify-content-end gap-2">
-          <button class="btn btn-sm btn-brand" onclick="likePost('<%= post._id %>')">Like (<span id="like-like-post-<%= post._id %>"><%= post.likes %></span>)</button>        
+          <button class="btn btn-sm btn-brand like-post-btn" data-post-id="<%= post._id %>">
+            Like (<span id="like-like-post-<%= post._id %>"><%= post.likes.length %></span>)
+          </button>        
           <button class="btn btn-sm btn-brand" data-bs-toggle="modal" data-bs-target="#commentModal-<%= post._id %>">Comment</button>
             <a href="#" class="btn btn-sm btn-brand" data-bs-toggle="modal" data-bs-target="#EditForm-<%= post._id %>">Edit</a>
-            <form class="d-inline" action="/delete-post/<%= post._id %>?_method=DELETE" method="POST" onsubmit="return confirm('Delete this post?')">
+            <form class="d-inline delete-form" action="/delete-post/<%= post._id %>?_method=DELETE" method="POST" data-confirm-message="Delete this post?">
+              <input type="hidden" name="returnUrl" value="<%= currentUrl %>">
               <button type="submit" class="btn btn-sm btn-danger">Delete</button>
             </form>
         </div>
@@ -168,10 +171,13 @@
   
           <!-- Comment Actions -->
           <div class="mt-2 d-flex justify-content-end gap-2">
-            <button class="btn btn-sm btn-brand" onclick="likeComment('<%= comment._id %>')">Like (<span id="like-like-comment-<%= comment._id %>"><%= comment.likes.length %></span>)</button>          
-            <button onclick="openReplyModal('<%= comment._id %>', 'comment')" class="btn btn-sm btn-brand">Reply</button>
-              <a href="#" class="btn btn-sm btn-brand" onclick="openEditModal('<%= comment._id %>', '<%= comment.text %>', 'comment')">Edit</a>
-              <form class="d-inline" action="/delete-comment/<%= comment._id %>?_method=DELETE" method="POST" onsubmit="return confirm('Delete this comment?')">
+            <button class="btn btn-sm btn-brand like-comment-btn" data-comment-id="<%= comment._id %>">
+              Like (<span id="like-like-comment-<%= comment._id %>"><%= comment.likes.length %></span>)
+            </button>          
+            <button class="btn btn-sm btn-brand reply-btn" data-comment-id="<%= comment._id %>" data-type="comment">Reply</button>
+            <a href="#" class="btn btn-sm btn-brand edit-btn" data-id="<%= comment._id %>" data-content="<%= comment.text %>" data-type="comment">Edit</a>
+              <form class="d-inline delete-form" action="/delete-comment/<%= comment._id %>?_method=DELETE" method="POST" data-confirm-message="Delete this comment?">
+                <input type="hidden" name="returnUrl" value="<%= currentUrl %>">
                 <button type="submit" class="btn btn-sm btn-danger">Delete</button>
               </form>
           </div>
@@ -190,6 +196,9 @@
                 </div>
                 <div class="flex-grow-1 ms-3">
                     <div class="d-flex flex-column align-items-start">
+                        <small class="opacity-50 no-wrap">
+                          <%= reply.author ? reply.author.name : "Unknown User" %>
+                        </small>
                         <strong><%= reply.text %></strong>
                         <small class="opacity-50 no-wrap" data-timeago="<%= reply.createdAt %>"></small>
                       </div>
@@ -198,9 +207,12 @@
   
             <!-- Reply Actions -->
             <div class="mt-2 d-flex justify-content-end gap-2">
-              <button class="btn btn-sm btn-brand" onclick="likeReply('<%= reply._id %>')">Like (<span id="like-like-reply-<%= reply._id %>"><%= reply.likes.length %></span>)</button>            
-              <a href="#" class="btn btn-sm btn-brand" onclick="openEditModal('<%= reply._id %>', '<%= reply.text %>', 'reply')">Edit</a>
-              <form class="d-inline" action="/delete-reply/<%= comment._id %>/<%= reply._id %>?_method=DELETE" method="POST" onsubmit="return confirm('Delete this reply?')">
+              <button class="btn btn-sm btn-brand like-reply-btn" data-reply-id="<%= reply._id %>">
+                Like (<span id="like-like-reply-<%= reply._id %>"><%= reply.likes.length %></span>)
+              </button>            
+              <a href="#" class="btn btn-sm btn-brand edit-btn" data-id="<%= reply._id %>" data-content="<%= reply.text %>" data-type="reply">Edit</a>
+              <form class="d-inline delete-form" action="/delete-reply/<%= comment._id %>/<%= reply._id %>?_method=DELETE" method="POST" data-confirm-message="Delete this reply?">
+                <input type="hidden" name="returnUrl" value="<%= currentUrl %>">
                 <button type="submit" class="btn btn-sm btn-danger">Delete</button>
               </form>
             </div>
@@ -217,6 +229,7 @@
               <button type="button" class="btn-close position-absolute top-0 end-0 m-2" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>             
             <form id="editForm" action="/edit-post/<%= post._id %>?_method=PUT" method="POST">
+              <input type="hidden" name="returnUrl" value="<%= currentUrl %>">
               <div class="modal-body">
                 <textarea id="editContent" name="post[content]" class="form-control"><%= post.content %></textarea>
               </div>
@@ -245,6 +258,7 @@
             <button type="button" class="btn-close position-absolute top-0 end-0 m-2" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <form action="/add-comment/<%= post._id %>" method="POST">
+            <input type="hidden" name="returnUrl" value="<%= currentUrl %>">
             <div class="modal-body">
               <textarea name="comment" class="form-control" placeholder="Write a comment..." required></textarea>
             </div>
@@ -259,7 +273,7 @@
   </div>
  
   
-  <!-- Comment Modal -->
+  <!-- Reply Modal -->
   <div class="modal fade" id="replyModal" tabindex="-1" aria-labelledby="replyModalLabel" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
@@ -273,6 +287,7 @@
           </div>
           <div class="modal-footer">
               <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+              <input type="hidden" name="returnUrl" value="<%= currentUrl %>">
               <button type="submit" class="btn btn-brand">Post Reply</button>
           </div>
       </form>    
@@ -409,12 +424,10 @@
 
     
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@4.0/dist/fancybox.umd.js"></script>
     <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
     <script src="./assets/js/main.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
       function initMap() {
@@ -432,20 +445,46 @@
 
     <script>
       function updateLikeCount(id, type) {
-          fetch(`/${type}/${id}`, { method: 'POST' })
-            .then(response => response.json())
-            .then(data => {
+          let endpoint;
+
+          switch(type) {
+              case 'like-post':
+                  endpoint = `/like-post/${id}`;
+                  break;
+              case 'like-comment':
+                  endpoint = `/like-comment/${id}`;
+                  break;
+              case 'like-reply':
+                  endpoint = `/like-reply/${id}`;
+                  break;
+              default:
+                  return;
+          }
+
+          fetch(endpoint, {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ userId: '<%= user ? user._id : "" %>' })
+          })
+          .then(res => res.json())
+          .then(data => {
               const likeElement = document.getElementById(`like-${type}-${id}`);
               if (likeElement) {
                   likeElement.innerText = data.likes;
               }
-            });
+          })
+          .catch(err => {
+            console.error(err);
+            showError('An error occurred. Please try again.');
+          });
       }
+
       function likePost(postId) { updateLikeCount(postId, 'like-post'); }
       function likeComment(commentId) { updateLikeCount(commentId, 'like-comment'); }
       function likeReply(replyId) { updateLikeCount(replyId, 'like-reply'); }
 
-      // Open Edit Modal
       // Open Edit Modal
       function openEditModal(id, content, type) {
         if (type === 'reply') {
@@ -492,10 +531,71 @@
 
       // Open Reply Modal
       function openReplyModal(parentId, type) {
-        document.getElementById('replyContent').value = '';
-        document.getElementById('replyForm').action = `/reply-to-${type}/${parentId}`;
-        new bootstrap.Modal(document.getElementById('replyModal')).show();
+        const replyModal = document.getElementById('replyModal');
+        if (replyModal) {
+          const form = replyModal.querySelector('form');
+          form.action = `/reply-to-comment/${parentId}`;
+          new bootstrap.Modal(replyModal).show();
+        } else {
+          console.error('Reply modal not found');
+        }
       }
+
+      document.addEventListener('DOMContentLoaded', function() {
+        // Like post buttons
+        document.querySelectorAll('.like-post-btn').forEach(button => {
+          button.addEventListener('click', function() {
+            const postId = this.getAttribute('data-post-id');
+            updateLikeCount(postId, 'like-post');
+          });
+        });
+
+        // Like comment buttons
+        document.querySelectorAll('.like-comment-btn').forEach(button => {
+          button.addEventListener('click', function() {
+            const commentId = this.getAttribute('data-comment-id');
+            updateLikeCount(commentId, 'like-comment');
+          });
+        });
+
+        // Like reply buttons
+        document.querySelectorAll('.like-reply-btn').forEach(button => {
+          button.addEventListener('click', function() {
+            const replyId = this.getAttribute('data-reply-id');
+            updateLikeCount(replyId, 'like-reply');
+          });
+        });
+
+        // Reply buttons
+        document.querySelectorAll('.reply-btn').forEach(button => {
+          button.addEventListener('click', function() {
+            const commentId = this.getAttribute('data-comment-id');
+            const type = this.getAttribute('data-type');
+            openReplyModal(commentId, type);
+          });
+        });
+
+        // Edit buttons
+        document.querySelectorAll('.edit-btn').forEach(button => {
+          button.addEventListener('click', function(e) {
+            e.preventDefault();
+            const id = this.getAttribute('data-id');
+            const content = this.getAttribute('data-content');
+            const type = this.getAttribute('data-type');
+            openEditModal(id, content, type);
+          });
+        });
+
+        // Delete confirmation
+        document.querySelectorAll('.delete-form').forEach(form => {
+          form.addEventListener('submit', function(e) {
+            const confirmMessage = this.getAttribute('data-confirm-message');
+            if (!confirm(confirmMessage)) {
+              e.preventDefault();
+            }
+          });
+        });
+      });
 
       //Convert timestamps to "time ago" format
       document.querySelectorAll('[data-timeago]').forEach(el => {

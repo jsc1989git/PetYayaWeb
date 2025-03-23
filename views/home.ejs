@@ -118,6 +118,7 @@
       <div class="line"></div>
       <div class="container mt-3">
         <form action="/add-post" method="POST">
+          <input type="hidden" name="returnUrl" value="<%= currentUrl %>">
           <div class="mb-2">
             <textarea id="postContent" name="post[content]" class="form-control" rows="3" placeholder="Write something..." required></textarea>
           </div>
@@ -162,6 +163,7 @@
           <% if (user && post.author && post.author._id.toString() === user._id.toString()) { %>
           <a href="#" class="btn btn-sm btn-brand" data-bs-toggle="modal" data-bs-target="#EditForm-<%= post._id %>">Edit</a>
           <form class="d-inline delete-form" action="/delete-post/<%= post._id %>?_method=DELETE" method="POST" data-confirm-message="Delete this post?">
+            <input type="hidden" name="returnUrl" value="<%= currentUrl %>">
             <button type="submit" class="btn btn-sm btn-danger">Delete</button>
           </form>
           <% } %>
@@ -198,7 +200,8 @@
             <button class="btn btn-sm btn-brand reply-btn" data-comment-id="<%= comment._id %>" data-type="comment">Reply</button>
             <% if (comment.author && user && comment.author._id.toString() === user._id.toString()) { %>
               <a href="#" class="btn btn-sm btn-brand edit-btn" data-id="<%= comment._id %>" data-content="<%= comment.text %>" data-type="comment">Edit</a>              
-                <form class="d-inline delete-form" action="/delete-comment/<%= comment._id %>?_method=DELETE" method="POST" data-confirm-message="Delete this comment?">
+              <form class="d-inline delete-form" action="/delete-comment/<%= comment._id %>?_method=DELETE" method="POST" data-confirm-message="Delete this comment?">
+                <input type="hidden" name="returnUrl" value="<%= currentUrl %>">
                 <button type="submit" class="btn btn-sm btn-danger">Delete</button>
               </form>
             <% } %>
@@ -236,6 +239,7 @@
               <% if (reply.author && user && reply.author._id.toString() === user._id.toString()) { %>            
                 <a href="#" class="btn btn-sm btn-brand edit-btn" data-id="<%= reply._id %>" data-content="<%= reply.text %>" data-type="reply">Edit</a>
               <form class="d-inline delete-form" action="/delete-reply/<%= comment._id %>/<%= reply._id %>?_method=DELETE" method="POST" data-confirm-message="Delete this reply?">
+                <input type="hidden" name="returnUrl" value="<%= currentUrl %>">
                 <button type="submit" class="btn btn-sm btn-danger">Delete</button>
               </form>
               <% } %>
@@ -253,6 +257,7 @@
               <button type="button" class="btn-close position-absolute top-0 end-0 m-2" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>             
             <form id="editForm" action="/edit-post/<%= post._id %>?_method=PUT" method="POST">
+              <input type="hidden" name="returnUrl" value="<%= currentUrl %>">
               <div class="modal-body">
                 <textarea id="editContent" name="post[content]" class="form-control"><%= post.content %></textarea>
               </div>
@@ -281,6 +286,7 @@
             <button type="button" class="btn-close position-absolute top-0 end-0 m-2" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <form action="/add-comment/<%= post._id %>" method="POST">
+            <input type="hidden" name="returnUrl" value="<%= currentUrl %>">
             <div class="modal-body">
               <textarea name="text" class="form-control" placeholder="Write a comment..." required></textarea>
             </div>
@@ -308,6 +314,7 @@
           </div>
           <div class="modal-footer">
               <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+              <input type="hidden" name="returnUrl" value="<%= currentUrl %>">
               <button type="submit" class="btn btn-brand">Post Reply</button>
           </div>
       </form>    
@@ -639,17 +646,16 @@
             }
           });
         });
-        
-        // Convert timestamps to "time ago" format
+
+        //Convert timestamps to "time ago" format
         document.querySelectorAll('[data-timeago]').forEach(el => {
           el.innerText = timeago.format(el.getAttribute('data-timeago'));
         });
+        
       });
+        
 
-      //Convert timestamps to "time ago" format
-      document.querySelectorAll('[data-timeago]').forEach(el => {
-          el.innerText = timeago.format(el.getAttribute('data-timeago'));
-        });
+      
     </script> 
     
   </body>

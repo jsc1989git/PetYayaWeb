@@ -36,10 +36,20 @@ exports.posts = async (req, res) => {
                 select: "name avatar"
             })
             .sort({ createdAt: -1 });
-        res.render('home', { posts, user: req.user, catImages: response.data, googleMapsApiKey: gMapAPIKey });
+        res.render('home', { 
+            posts,
+            user: req.user,
+            catImages: response.data,
+            googleMapsApiKey: gMapAPIKey,
+            currentUrl: req.originalUrl
+        });
     } catch (error) {
         console.error("Error fetching posts:", error);
-        res.render('home', { posts: [], catImages: [] });
+        res.render('home', {
+            posts: [],
+            catImages: [],
+            currentUrl: req.originalUrl
+        });
     }
 };
 
@@ -57,10 +67,18 @@ exports.profile = async (req, res) => {
                 select: "name avatar"
             })
             .sort({ createdAt: -1 });
-        res.render('profile', { posts, user: req.user, googleMapsApiKey: gMapAPIKey });
+        res.render('profile', { 
+            posts,
+            user: req.user,
+            googleMapsApiKey: gMapAPIKey,
+            currentUrl: req.originalUrl
+         });
     } catch (error) {
         console.error("Error fetching posts:", error);
-        res.render('profile', { posts: [] });
+        res.render('profile', {
+             posts: [],
+             currentUrl: req.originalUrl
+            });
     }
 };
 
@@ -79,7 +97,12 @@ exports.admin = async (req, res) => {
                 select: "name avatar"
             })
             .sort({ createdAt: -1 });
-        res.render('admin', { posts, catImages: response.data, googleMapsApiKey: gMapAPIKey });
+        res.render('admin', {
+            posts,
+            catImages: response.data,
+            googleMapsApiKey: gMapAPIKey,
+            currentUrl: req.originalUrl
+        });
     } catch (error) {
         console.error("Error fetching posts:", error);
         res.render('admin', { posts: [], catImages: [] });
@@ -94,6 +117,7 @@ exports.addPost = async (req, res) => {
         }
 
         const { content } = req.body.post; // Get post content from request body
+        const returnUrl = req.body.returnUrl; // Get return URL from request body
 
         if (!content) {
             return res.status(400).json({ error: "Content is required" });
@@ -105,7 +129,7 @@ exports.addPost = async (req, res) => {
         });
 
         await newPost.save();
-        res.redirect(req.get('Referer') || '/feed');
+        res.redirect(returnUrl || '/feed');
     } catch (error) {
         console.error("Error adding post:", error);
         res.status(500).json({ error: "Error adding post" });
@@ -114,6 +138,9 @@ exports.addPost = async (req, res) => {
 
 exports.editPost = async (req, res) => {
     try {
+
+        const returnUrl = req.body.returnUrl; // Get return URL from request body
+    
         if (!req.user || !req.user.id) {
             return res.status(401).json({ error: "Unauthorized. Please log in." });
         }
@@ -134,7 +161,7 @@ exports.editPost = async (req, res) => {
         post.content = req.body.post.content;
         await post.save();
 
-        res.redirect(req.get('Referer') || '/feed');
+        res.redirect(returnUrl || '/feed');
     } catch (error) {
         console.error("Error editing post:", error);
         res.status(500).json({ error: "Internal server error" });
@@ -143,6 +170,8 @@ exports.editPost = async (req, res) => {
 
 exports.deletePost = async (req, res) => {
     try {
+        const returnUrl = req.body.returnUrl;
+
         // Ensure req.user exists before accessing id
         if (!req.user || !req.user.id) {
             return res.status(401).json({ error: "Unauthorized. Please log in." });
@@ -167,7 +196,7 @@ exports.deletePost = async (req, res) => {
 
         // Delete post
         await post.deleteOne();
-        res.redirect(req.get('Referer') || '/feed');
+        res.redirect(returnUrl || '/feed');
 
     } catch (error) {
         console.error("Error deleting post:", error);
@@ -208,6 +237,7 @@ exports.likePost = async (req, res) => {
 // CRUD Operations for Comments
 exports.addComment = async (req, res) => {
     try {
+        
         const post = await Posts.findById(req.params.id);
 
         if (!post) {
@@ -215,6 +245,7 @@ exports.addComment = async (req, res) => {
         }
 
         const { text } = req.body; // Get comment text from request body
+        const returnUrl = req.body.returnUrl;
 
         if (!text) {
             return res.status(400).json({ error: 'Comment text is required' });
@@ -228,7 +259,7 @@ exports.addComment = async (req, res) => {
         });
 
         await post.save();
-        res.redirect(req.get('Referer') || '/feed');
+        res.redirect(returnUrl || '/feed');
     } catch (error) {
         console.error("Error adding comment:", error);
         res.status(500).json({ error: 'Internal server error' });
@@ -237,6 +268,8 @@ exports.addComment = async (req, res) => {
 
 exports.editComment = async (req, res) => {
     try {
+        
+
         const post = await Posts.findOne(
             { 'comments._id': req.params.id }
         )
@@ -252,9 +285,10 @@ exports.editComment = async (req, res) => {
         }
 
         comment.text = req.body.text;
+        const returnUrl = req.body.returnUrl;
 
         await post.save();
-        res.redirect(req.get('Referer') || '/feed');
+        res.redirect(returnUrl || '/feed');
     } catch (error) {
         console.error("Error liking comment:", error);
         res.status(500).json({ error: 'Internal server error' });
@@ -264,6 +298,7 @@ exports.editComment = async (req, res) => {
 exports.deleteComment = async (req, res) => {
     try {
 
+        const returnUrl = req.body.returnUrl;
         const post = await Posts.findOne({ 'comments._id': req.params.commentId });
 
         if (!post) {
@@ -286,7 +321,7 @@ exports.deleteComment = async (req, res) => {
             { new: true }
         );
 
-        res.redirect(req.get('Referer') || '/feed');
+        res.redirect(returnUrl || '/feed');
         
     } catch (error) {
         console.error("Error deleting comment:", error);
@@ -328,6 +363,7 @@ exports.likeComment = async (req, res) => {
 // CRUD Operations for Replies
 exports.addReplyToComment = async (req, res) => {
     try {
+        
         const post = await Posts.findOne({'comments._id': req.params.commentId});
 
         if (!post) {
@@ -341,6 +377,7 @@ exports.addReplyToComment = async (req, res) => {
         }
 
         const { text } = req.body; // Get reply text from request body
+        const returnUrl = req.body.returnUrl;
 
         if (!text) {
             return res.status(400).json({ error: 'Reply text is required' });
@@ -353,7 +390,7 @@ exports.addReplyToComment = async (req, res) => {
         });
 
         await post.save();
-        res.redirect(req.get('Referer') || '/feed');
+        res.redirect(returnUrl || '/feed');
     } catch (error) {
         console.error("Error adding reply:", error);
         res.status(500).json({ error: 'Internal server error' });
@@ -398,6 +435,9 @@ exports.likeReply = async (req, res) => {
 
 exports.editReply = async (req, res) => {
     try {
+
+        const returnUrl = req.body.returnUrl;
+
         const post = await Posts.findOne(
             { 'comments.replies._id': req.params.id }
         );
@@ -423,7 +463,7 @@ exports.editReply = async (req, res) => {
         reply.text = req.body.text;
 
         await post.save();
-        res.redirect(req.get('Referer') || '/feed');
+        res.redirect(returnUrl || '/feed');
     } catch (error) {
         console.error("Error editing reply:", error);
         res.status(500).json({ error: 'Internal server error' });
@@ -432,6 +472,8 @@ exports.editReply = async (req, res) => {
 
 exports.deleteReply = async (req, res) => {
     try {
+        const returnUrl = req.body.returnUrl;
+
         const post = await Posts.findOne({
             'comments._id': req.params.commentId,
             'comments.replies._id': req.params.replyId
@@ -448,7 +490,7 @@ exports.deleteReply = async (req, res) => {
         }
 
         const reply = comment.replies.id(req.params.replyId);
-        
+
         if (reply && reply.author.toString() !== req.user.id && req.user.role !== 'admin') {
             return res.status(403).json({ error: 'You can only delete your own replies' });
         }
@@ -458,7 +500,7 @@ exports.deleteReply = async (req, res) => {
         );
 
         await post.save();
-        res.redirect(req.get('Referer') || '/feed');
+        res.redirect(returnUrl || '/feed');
     } catch (error) {
         console.error("Error deleting reply:", error);
         res.status(500).json({ error: 'Internal server error' });
@@ -466,6 +508,7 @@ exports.deleteReply = async (req, res) => {
 };
 
 exports.addReplyToReply = async (req, res) => {
+    const returnUrl = req.body.returnUrl;
     const post = await Posts.findById(req.params.postId);
     if (post) {
         const comment = post.comments.id(req.params.commentId);
@@ -474,7 +517,7 @@ exports.addReplyToReply = async (req, res) => {
             if (reply) {
                 comment.replies.push({ text: req.body.text });
                 await post.save();
-                res.redirect(req.get('Referer') || '/feed');
+                res.redirect(returnUrl || '/feed');
             } else {
                 res.status(404).json({ success: false, message: "Reply not found" });
             }
